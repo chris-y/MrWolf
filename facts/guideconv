@@ -1,0 +1,4 @@
+failat 10000
+makedir ram:guide
+stack 500000
+c:guideml Work:Files/Projects/FACTS/facts-distrib/docs/english/facts.guide TO RAM:guide NONAVBAR HTMLHEADF Work:Files/Projects/FACTS/gc_top_new CSS="../../newlook.css" HTMLFOOTF Work:Files/Projects/FACTS/gc_bot_new

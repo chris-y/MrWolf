@@ -1,0 +1,10 @@
+failat 50
+cd dh1:files/projects/facts/french
+makedir ram:guidefr
+list >t:script #?.htm LFORMAT "type >*"ram:guidefr/%n*" dh1:files/projects/facts/gc_top_mini"
+list >>t:script #?.htm LFORMAT "type >>*"ram:guidefr/%n*" *"%n*""
+list >>t:script #?.htm LFORMAT "type >>*"ram:guidefr/%n*" dh1:files/projects/facts/gc_bot_mini"
+execute t:script
+srename ram:guidefr/{#?}.htm TC left 1 to ( right 5 to ).htm
+;srename ram:guidefr/{#?}.htm CO TF
+;delete t:script

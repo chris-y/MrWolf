@@ -1,0 +1,12 @@
+.bra {
+.ket }
+
+failat 50
+cd dh1:files/projects/facts/french/
+makedir ram:guidefr
+list >t:script #?.htm LFORMAT "fasttype dh1:files/projects/facts/gc_top_new2 >*"ram:guidefr/%n*""
+list >>t:script #?.htm LFORMAT "fasttype *"%n*" >>*"ram:guidefr/%n*""
+list >>t:script #?.htm LFORMAT "fasttype dh1:files/projects/facts/gc_bot_new >>*"ram:guidefr/%n*""
+execute t:script
+srename ram:guidefr/{#?}.htm CO TF
+;delete t:script
