@@ -1,0 +1,2 @@
+# facts
+Amiga time synchronisation
