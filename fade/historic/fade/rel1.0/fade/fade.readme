@@ -1,0 +1,12 @@
+Short: Network time synchronisation client
+Uploader: unsatisfactory@bigfoot.com
+Author: Chris Young (unsatisfactory@bigfoot.com)
+Type: util/time
+Version: 1.0
+Homepage: www.unsatisfactory.freeserve.co.uk
+
+Command line time synchronisation client for AmigaDE/intent.
+Supports daytime, time (tcp/udp) and sntp (ntp) servers.
+
+Decompress this archive into the AmigaDE root, documentation
+is available as app/fade/doc/fade.txt

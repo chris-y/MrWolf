@@ -1,0 +1,12 @@
+Short: UK Numberplate Decoder - shows date and area of registration
+Uploader: unsatisfactory@bigfoot.com
+Author: Chris Young (unsatisfactory@bigfoot.com)
+Type: util/misc
+Version: 1.0
+Homepage: www.unsatisfactory.freeserve.co.uk
+
+NPD is a command line program for decoding place and date of
+registration from most UK number plates.  It is probably most useful
+on a PDA for people buying used cars, although the fact it needs to
+be run from a command line makes this complicated.  I may add a GUI
+at some point in the future.

@@ -1,0 +1,72 @@
+fade... release 1.2 (24.02.2002)
+(c) 2001-2 Unsatisfactory Software
+by Chris Young <chrisdpy@bigfoot.com>
+
+Disclaimer - READ THIS BEFORE USING THE SOFTWARE
+----------
+
+This software package ("fade") has been proven to be stable in normal use, although I can accept
+no responsibility for any damage or other problems caused by the software.  This software is
+intended to be used for the specified purpose only, and is not guaranteed to any degree of
+accuracy.  All use of this package is at your own risk.  By using this software you agree to
+these terms.
+
+Introduction
+------------
+
+Fade ("Facts for AmigaDE") is a time server/client implementation for AmigaDE.  It is very much
+work-in-progress and currently only consists of a command line client interface.  GUI and server
+features will be available later.
+
+A concept document is available as app/fade/doc/concept.txt
+
+Installation
+------------
+
+The following files are REQUIRED and must be copied to the AmigaDE root:
+app/fade/nettime.00
+lib/unsat/joinstr.00
+lib/unsat/splstr.00
+lib/unsat/readline.00
+
+Additionally, at least one of the following must be copied:
+app/fade/client/daytime.00
+app/fade/client/timetcp.00
+app/fade/client/timeudp.00
+app/fade/client/sntp.00
+
+Usage
+-----
+
+From an Eterm or Amiga Shell, type the following:
+
+app/fade/nettime <server> <protocol>
+
+Where:
+<server> is the server name, eg. ntp2a.mcc.ac.uk
+<protocol> is the protocol, eg. sntp
+           (same as the file names in app/fade/client/ but without the extension)
+
+You can also create a text file called app/fade/servers containing a list of servers
+to try.  This MUST be in Amiga/UNIX text format and finish with a blank line.  The
+format is the same as you would give to the nettime command, ie. <server> <protocol>
+
+Servers
+-------
+
+A list of servers can be found at http://www.eecis.udel.edu/~mills/ntp/servers.htm
+An abridged version is available in the Facts documentation at
+http://www.unsatisfactory.freeserve.co.uk/facts/guide/ntpservers.html
+
+Protocols
+---------
+
+Protocols in order of accuracy (most accurate last)
+daytime - Uses TCP, port 13
+timetcp - Uses TCP, port 37
+timeudp - Uses UDP, port 37
+sntp    - Uses UDP, port 123 (use this protocol if at all possible!)
+
+Further information on some of the above topics can be found in the FACTS guide at
+http://www.unsatisfactory.freeserve.co.uk/facts/guide/main.html
+

@@ -1,0 +1,29 @@
+<html>
+<head>
+<title>faded</title>
+</head>
+<body>
+<h1>Usage</h1>
+
+<p>faded is the "fade daemon" which launches the server processes for time services.  It is started from an Eterm or Shell with the following parameters:
+
+<p><tt>app/fade/faded &lt;service&gt; [protocol] [port]</tt>
+
+<p>Where:<br>
+<table>
+<tr><td>service<td>The name of the service, limited to the modules in app/fade/server/.  Currently only daytime and fade are supplied.
+<tr><td>protocol<td>"udp" or "tcp", currently only tcp services can be started.
+<tr><td>port<td>The port number to listen on.  The usual port numbers are listed <a href="usage.html">here</a>.  faded will do a reverse lookup of the service to try to find the port number if this is not specified.
+</table>
+
+<p>If successful, faded should report "Waiting for connection...".  Anybody connecting to the specified port (eg. with app/fade/nettime) will get the time from your machine.
+
+<p><b>Aborting server sessions</b>
+
+<p>The tool app/fade/qfaded is supplied to help abort server sessions.  The template is as follows:
+
+<p><tt>app/fade/qfaded &lt;server:port&gt; &lt;service&gt; &lt;protocol&gt;</tt>
+
+<p>This writes a file to disk to tell the specified service to quit, and then connects to the server to force it to stop waiting for connections.  This must be run from the machine the service is running from - it will not abort remote services.  Consequently, if you have the same service running on more than port, there is a possibility that the other conections will also quit.
+</body>
+</html>

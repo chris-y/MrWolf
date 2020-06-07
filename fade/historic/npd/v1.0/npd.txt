@@ -1,0 +1,78 @@
+npd 1.0 (09.09.2001)  UK numberplate decoder
+by Chris Young <chris@unsatisfactory.freeserve.co.uk>
+
+Introduction
+------------
+
+NPD is a command line program for decoding place and date of
+registration from most UK number plates.  It is probably most useful
+on a PDA for people buying used cars, although the fact it needs to
+be run from a command line makes this complicated.  I may add a GUI
+at some point in the future.
+
+I originally envisaged this program for working out the registration
+area and age of cars with new-style registration marks.  I then
+decided it would be a good idea to work out the age of older style
+registrations as well.  Not wishing to work out the dates and chance
+it all to luck, I seeked out the required information on the Internet.
+It was at this point I found the codes for registration area of both
+the previous style marks, and the early numberplates.  It took a while
+to type them in, but I got there.
+
+Installation
+------------
+
+Copy the file npd.00 into /app/stdio (decompressing this archive into
+the AmigaDE root will have the same effect)
+
+Usage
+-----
+
+Simply call NPD from the Shell with the registration code as an
+argument.  NPD automatically recognises the style, and should tell
+you if it is not recognised or invalid.  It will then output as much
+information as possible, from the following:
+
+Registration:
+  The registration mark, capitalised and formatted so the numerical
+  part (of older style plates) takes up three character spaces.
+
+Reg Period:
+  The date the sequence of registrations first came out.  The period
+  lasts a year for codes starting in January or August, and six months
+  for those first registered March or September.
+
+Age: (displayed in brackets after the period)
+  Approximate age of the vehicle, calculated using your machine's
+  internal clock.  This is not displayed for vehicles that appear to
+  have been registered in the future.
+
+Reg Area or Local Memory Tag:
+  The area where the car was registered.  Take this with a pinch of
+  salt, as areas which run out of registration codes borrow them from
+  other areas.
+
+Example
+-------
+
+20010425:/$ npd chr15y                 
+Numberplate Decoder by Chris Young     
+(c) 2001 Unsatisfactory Software       
+                                       
+Registration: CHR15 Y                  
+Reg Period: August 1982 (~19 years old)
+Reg Area: Wiltshire                    
+
+Thanks To...
+------------
+
+The following website, where I got most of my information from:
+http://members.tripod.com/mghorizon//html/usefulstuff/regnos.html
+
+Disclaimer
+----------
+
+Although the information contained in this software is correct to the
+best of my knowledge, all use of the software and information is at
+your own risk and I cannot be held responsible for any consequences
+resulting from the use of this package.
