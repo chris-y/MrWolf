@@ -1,0 +1,23 @@
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+ 
+jobs:
+  build_ppc:
+    runs-on: ubuntu-latest
+    container:
+      image: amigadev/crosstools:ppc-amigaos
+    name: build_os4
+    steps:
+      - uses: actions/checkout@v2
+      - name: build_os4
+        id: build_os4
+        run: |
+          cd ./yfacts
+          gcc -Os -N -o yfacts yfacts.c -lauto
+      - uses: actions/upload-artifact@v2
+        with:
+          name: yfacts
+          path: ./yfacts/yfacts
