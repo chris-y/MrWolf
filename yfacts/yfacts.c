@@ -19,7 +19,7 @@ strip -R.comment yfacts
 
 #include <workbench/startup.h>
 
-#include "yfacts_rev.h"
+#include "yFacts_rev.h"
 
 const char __attribute__((used)) *version = VERSTAG;
 
