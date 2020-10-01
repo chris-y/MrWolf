@@ -8,6 +8,7 @@ strip -R.comment yfacts
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <proto/commodities.h>
 #include <proto/dos.h>
@@ -332,11 +333,11 @@ int main(int argc, char **argv)
 		for(i=0,wbarg=WBenchMsg->sm_ArgList;i<WBenchMsg->sm_NumArgs;i++,wbarg++) {
 			olddir =-1;
 			if((wbarg->wa_Lock)&&(*wbarg->wa_Name))
-				olddir = CurrentDir(wbarg->wa_Lock);
+				olddir = SetCurrentDir(wbarg->wa_Lock);
 
 			gettooltypes(wbarg);
 
-			if(olddir !=-1) CurrentDir(olddir);
+			if(olddir !=-1) SetCurrentDir(olddir);
 		}
 
 		if(startcx()) {
