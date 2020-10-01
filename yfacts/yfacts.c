@@ -268,7 +268,7 @@ int main(int argc, char **argv)
 {
 	struct WBStartup *WBenchMsg;
 	struct WBArg *wbarg;
-	char i;
+	LONG i;
 	LONG olddir =-1;
 	BOOL quiet = TRUE;
 	int err;
