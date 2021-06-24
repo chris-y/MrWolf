@@ -16,7 +16,7 @@ jobs:
         id: build_os4
         run: |
           cd ./yfacts
-          gcc -Os -N -o yfacts yfacts.c -lauto
+          make -f Makefile
       - uses: actions/upload-artifact@v2
         with:
           name: yfacts
