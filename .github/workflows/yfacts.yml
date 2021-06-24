@@ -21,3 +21,19 @@ jobs:
         with:
           name: yfacts
           path: ./yfacts/yfacts
+  build_68k:
+    runs-on: ubuntu-latest
+    container:
+      image: amigadev/crosstools:m68k-amigaos
+    name: build_os3
+    steps:
+      - uses: actions/checkout@v2
+      - name: build_os3
+        id: build_os3
+        run: |
+          cd ./yfacts
+          make -f Makefile.OS3
+      - uses: actions/upload-artifact@v2
+        with:
+          name: yfacts.OS3
+          path: ./yfacts/yfacts
