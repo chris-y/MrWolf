@@ -1,0 +1,13 @@
+CC := vc +aos68k
+CFLAGS := -c99
+LIBS := -lauto -lamiga
+
+OBJS := yfacts.o
+
+all: yfacts
+
+$(OBJS): $(OBJS:.o=.c)
+	$(CC) $(CFLAGS) -c -o $@ $^
+
+yfacts: $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)

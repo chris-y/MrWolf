@@ -1,4 +1,8 @@
-/* yoctofacts 
+/* yoctofacts (yFacts)
+ * (c) 2013 Chris Young / Unsatisfactory Software
+ */
+
+/*
 gcc -Os -N -o yfacts yfacts.c -lauto
 strip yfacts
 strip -R.comment yfacts
@@ -14,15 +18,59 @@ strip -R.comment yfacts
 #include <proto/dos.h>
 #include <proto/exec.h>
 #include <proto/icon.h>
+#include <proto/wb.h>
+
+#ifdef __amigaos4__
 #include <proto/timesync.h>
 #include <proto/timezone.h>
-#include <proto/wb.h>
+#else
+#include <clib/alib_protos.h>
+#endif
 
 #include <workbench/startup.h>
 
 #include "yFacts_rev.h"
 
-const char __attribute__((used)) *version = VERSTAG;
+#ifndef __amigaos4__
+#define TSERR_NONE 0
+#define TSERR_FAIL 1
+#define SetCurrentDir CurrentDir
+#endif
+
+
+#ifdef __VBCC__
+#define UNUSED
+
+char *strdup(const char *s)
+{
+  size_t len = strlen (s) + 1;
+  char *result = (char*) malloc (len);
+  if (result == (char*) 0)
+    return (char*) 0;
+  return (char*) memcpy (result, s, len);
+}
+
+#else
+#define UNUSED __attribute__((unused))
+#endif
+
+const char UNUSED *version = VERSTAG;
+
+/* For some reason these are defined differently on OS3.2 and OS4,
+   so we just define our own here */
+
+struct TV_compat /* TimeVal */
+{
+    ULONG Seconds;
+    ULONG Microseconds;
+};
+
+struct TR_compat /* TimeRequest */
+{
+    struct IORequest Request;
+    struct TV_compat   Time;
+};
+
 
 /* Global config */
 int poll = 720;
@@ -36,7 +84,7 @@ int firstsync_delay = 0;
 
 /* Global vars */
 struct MsgPort *msgport;
-struct TimeRequest *tioreq;
+struct TR_compat *tioreq;
 CxObj *broker;
 struct MsgPort *broker_mp;
 int panic_mode = 0;
@@ -69,26 +117,16 @@ void show_error(int error, BOOL cli)
 int timesync(void)
 {
 	int err;
-//	int32 offset = 0;
-//	struct timeval timediff;
 
-/*
-	err = GetTimezoneAttrs(NULL,
-				TZA_UTCOffsetDST, &offset,
-				TAG_DONE);
-*/
-
-//DebugPrintF("yFacts: %s:%ld sys:%ld bc:%ld\n", server, port, savesys, savebc);
-
+#ifdef __amigaos4__
 	err = RemoteSync(RS_SERVER, server,
 					RS_PORT, port,
 					RS_SETSYSTIME, savesys,
 					RS_SAVETIME, savebc,
-//					RS_UTCOFFSET, - (offset * 60),
-//					RS_DIFFTIME, &timediff,
 					TAG_DONE);
-
-//printf("%ld, %ld\n", timediff.tv_sec, timediff.tv_usec);
+#else
+#warning TODO
+#endif
 
 	return err;
 }
@@ -128,6 +166,7 @@ BOOL timesync_poll()
 		}
 	} else {
 		if(panic_mode == panic_warn) {
+#ifdef __amigso4__
 			TimedDosRequesterTags(
 				TDR_ImageType, TDRIMAGE_INFO,
 				TDR_TitleString, "YoctoFacts",
@@ -135,6 +174,9 @@ BOOL timesync_poll()
 				TDR_GadgetString, "OK",
 				TDR_Inactive, TRUE,
 				TAG_DONE);
+#else
+#warning TODO
+#endif
 		}
 		panic_mode++;
 		startpoll(60);

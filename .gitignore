@@ -52,6 +52,6 @@ Mkfile.old
 dkms.conf
 
 #facts
-yfacts
-yfacts.debug
-facts_bsdsocket_gui
+yfacts/yfacts
+yfacts/yfacts.debug
+facts/facts_bsdsocket_gui
