@@ -25,7 +25,7 @@ strip -R.comment yfacts
 const char __attribute__((used)) *version = VERSTAG;
 
 /* Global config */
-int poll = 60;
+int poll = 720;
 int port = 123;
 char *server = NULL;
 BOOL savebc = FALSE;
