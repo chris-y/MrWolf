@@ -155,10 +155,10 @@ ENUM EVT_POPKEY,EVT_SAVEKEY
 PROC main() HANDLE
 DEF msg,colon,ls
 
-verstring:='$VER: FACTS 5.9 (05.10.2012)' /* internal 5.1, release 5.0 */
+verstring:='$VER: FACTS 5.10 (25.06.2021)' /* internal 5.1, release 5.0 */
 fver:='5'
-frev:='9'
-frel:='5.07'
+frev:='10'
+frel:='5.10'
 
 socketlib:='bsdsocket.library'
 socketver:=4

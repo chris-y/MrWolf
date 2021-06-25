@@ -1,0 +1,2192 @@
+@database FACTS
+@author "Chris Young"
+@(c) "© 1998-2007 Unsatisfactory Software"
+@$VER: facts.guide 4.22 (05.10.2012)
+@description "Documentation for FACTS: The GUI-based SNTP clock synchronisation program for AmigaOS"
+@wordwrap
+
+@node Main "Welcome to FACTS..."
+@{b}FACTS@{ub} Release 5.06 (05.10.2012)
+© 1998-2012 Unsatisfactory Software
+
+@{"*DISCLAIMER*" link DISCLAIMER}  @{"* SECURITY *" link security}
+@{"Introduction" link Introduction}  @{"Installation" link Installation}
+@{"Requirements" link Requirements}  @{"Distribution" link Distribution}
+
+@{fg shine}New Users@{fg text}
+@{"Getting Started      " link GettingStarted}
+@{"Example Configuration" link ExConfig}
+@{"Clock Synchronisation " link clocksync}
+
+@{fg shine}Reference and Information@{fg text}
+@{"The GUI     " link GUI} - A reference guide to the gadgets and menus
+@{"Servers     " link NTPServers} - Some public access NTP servers
+@{"AutoDST     " link settings-AutoDST} - The other reason to use FACTS
+@{"Leap Seconds" link settings-LeapSec} - Random events
+@{"FAQs        " link FAQs} - Frequently Anticipated Questions
+@{"Known Bugs  " link bugs} - Things to watch out for
+
+@{fg shine}Technical Details@{fg text}
+@{"Tooltypes  " link Tooltypes}  @{"Env-vars   " link envvar}
+@{"ARexx      " link ARexx}  @{"Scripts    " link arexx-scripts}
+@{"CLI Usage  " link cliusage}  @{"CX Exchange" link cxexchange}
+@{"Messages   " link msgs}  @{"Year 2000  " link y2k}
+
+@{fg shine}General@{fg text}
+@{"History" link History}  @{"Future " link Future}
+@{"Thanks " link thanks}  @{"Contact" link Contact}
+
+@endnode
+
+@node DISCLAIMER
+FACTS has been proven to be stable, but all use is at your own risk.  It
+shouldn't cause a nuclear war, give you food poisoning or destroy any data.
+In the unlikely event that it does anything nasty or undocumented, I'm
+afraid I cannot and will not accept any responsibility for the events that
+happen.
+
+In particular, if FACTS manages to de-synchronise the entire network of NTP
+servers, then I will deny all knowledge of its existance.
+
+AutoDST and Aninc are trademarks of Unsatisfactory Software
+© 1998-04 Unsatisfactory Software and Chris Young
+@endnode
+
+@node SECURITY
+After the bogus datatypes.library last year, which was illegally extracting
+passwords from Miami files, I feel compelled to assure you that FACTS does
+@{b}not@{ub} have any security loopholes or backdoors.  It does @{b}not@{ub}
+install itself as a server in any way.
+
+FACTS 5.0 no longer communicates with any server through HTTP.
+
+@endnode
+
+@node Introduction "Introduction: The facts about FACTS!"
+@{b}FACTS.  What is it?@{ub}
+
+Quite simply, the @{b}first@{ub} (and best) GUI-based SNTP clock synchronisation
+program available for the Amiga.
+
+SNTP is a Simple version of the Network Time Protocol, which is used by
+servers across the Internet to keep time accurate within picoseconds.
+
+FACTS logs on to one of these servers, and sets your system time and
+BattClock to the correct time.  It can also adjust your clock automatically
+when DST comes into effect.
+
+And it's FREE.  What more could you want?
+
+@{b}Why did you write it?@{ub}
+
+Because the only time synchronisation programs available either:
+
+a) didn't work
+b) didn't have a GUI
+c) didn't have many features
+d) all of the above
+
+And they all seemed to use the virtual TCP: device, along with the daytime
+protcol.  This meant that they wouldn't be terribly accurate, wouldn't work
+with all NTP servers (FreeServe's one, for example, doesn't support daytime)
+and wouldn't work with all TCP stacks.  Also, it seems silly to run two
+programs (a time synchroniser and a DST program), when the two could easily
+be combined into one package.
+
+FACTS aims to be the most configurable and most compatible SNTP client for
+the Amiga.  It should work with any version of Workbench from 2.04 (even the
+older 2.0x [v36] releases may be able to run FACTS), with any AmiTCP 4
+(bsdsocket.library) compatible TCP/IP stack and with any NTP server, using
+any service on any port number.  I hope.
+
+If you have any problems, queries, questions or comments, @{"just ask!" link contact}
+@endnode
+
+@node Requirements
+Workbench 2.04 or higher, with ARexx active.
+
+An AmiTCP 4 compatible TCP/IP stack is highly recommended, unless you plan
+to only use FACTS to adjust DST automatically.
+
+It does not support old socket.library (AS225?) stacks!
+@endnode
+
+@node Installation
+Please use the supplied script.  It won't (unless I've done something wrong)
+overwrite your existing tooltypes when updating FACTS.
+
+If you are on a new installation, please read @{"syncing the clock" link clocksync}
+@endnode
+
+@node Distribution "Fast Audio Compressed Terminal Storage"
+FACTS is @{b}FREEWARE@{ub}.  This means that it remains fully copyrighted to me, but
+can be freely distributed as long as the code is not modified and no money
+is charged (except a small fee for handling/media costs).
+
+If you put FACTS on a @{b}COMMERCIAL@{ub} CD (excluding Aminet CDs and
+magazine coverdiscs), you @{b}must@{ub} notify me.  In particular, I would
+appreciate a copy of the CD in question - if you are trying to make money
+out of something I have created, then I think I should get something out of
+it as well.  This isn't a @{i}requirement@{ui}, just a suggestion...
+@endnode
+
+@node GUI "Graphical User Interface"
+@{u}@{bg shine} @{"Project" link menu-project} @{"Settings" link menu-settings} @{"Special" link menu-special}                                                  @{bg back}@{uu}
+
+@{bg fill}@{"[]" link gadget-close}___________________________________@{"[]" link gadget-zoom}@{"[]" link gadget-back}@{bg back}
+|                                         |
+| Server:  @{"                    " link gadget-server}   @{"Check " link gadget-check} |
+|  Amiga:  @{"                    " link gadget-amiga}   @{"Adjust" link gadget-adjust} |
+|   Diff:  @{"                    " link gadget-diff}  Int @{"   " link gadget-int} |
+|   Addr:  @{"              " link gadget-addr} : @{"   " link gadget-port}  Def @{"  " link gadget-defport} |
+| Timezone:  @{"   " link gadget-tz}  ±hrs @{"   " link gadget-hrs}  DST @{"  " link gadget-dst} @{"    " link gadget-dstname} |
+|_________________________________________|
+
+
+FACTS has a GadTools-based font sensitive GUI.  In the "accepted" fashion
+(ie. everybody else seems to do this, even though it looks terrible), I've
+recreated the GUI in pure ASCII.  Click on the gadgets and menus to find out
+what everything does.
+
+Please use this section as a reference guide only: if you are new to FACTS,
+you should read the @{"getting started" link gettingstarted} and @{"example config" link exconfig} sections
+first.
+@endnode
+
+@node gadget-close "Window Close Gadget"
+Hides the GUI, but does not quit FACTS.
+@endnode
+
+@node gadget-back "Window Back Gadget"
+It is assumed that you know the basics of how to manipulate Intuition
+windows...
+@endnode
+
+@node gadget-zoom "Window Zoom Gadget"
+Shrinks the FACTS GUI to its titlebar only.  This titlebar will show a
+continually-updating clock.
+@endnode
+
+@node gadget-server "Server: field"
+This shows the time on the selected NTP server, at the time it was
+retrieved.
+@endnode
+
+@node gadget-amiga "Amiga: field"
+This shows the system time as it was before FACTS changes it, or
+shows the current system time constantly updating if @{"Show Updating Time" link settings-update}
+is set.
+@endnode
+
+@node gadget-diff "Diff: field"
+This shows the difference between your system time, and the time on the
+selected server.
+@endnode
+
+@node gadget-addr "Addr: gadget"
+Type the IP address or Internet name for a (preferably local) NTP server.  A
+list of public access servers can be found @{"here" link NTPServers}.
+@endnode
+
+@node gadget-port "Port: gadget"
+This is the TCP or UDP port number for the selected @{"service" link settings-service}.
+
+Defaults to standard ports:
+daytime: 13
+time   : 37
+sntp   : 123
+
+(note that these are verified with the TCP/IP stack on startup, if it is available.)
+@endnode
+
+@node gadget-tz "Timezone: gadget"
+This is a three character ID string for your timezone.  Defaults to "UTC".
+
+Examples:
+GMT - Greenwich Mean Time
+MET - Mid European Time
+PST - Pacific Standard Time
+@endnode
+
+@node gadget-hrs "±hrs: gadget"
+This should be set to the number of whole hours you are @{b}east@{ub} of GMT.
+If you are behind GMT, then this number will be negative!
+
+If you live in a timezone which has a half-hour offset, please also set
+@{"Extra Half Hour" link settings-extrahalfhour} in the @{"Settings" link menu-settings} menu.
+@endnode
+
+@node gadget-dst "DST: checkbox"
+This should be checked if you are currently in summertime, unchecked
+otherwise.  Please also see @{"AutoDST" link settings-autodst}.
+@endnode
+
+@node gadget-dstname "DST: gadget"
+This is a four character ID string for your DST (summertime) name.  If your
+zone uses a name less than four characters, it will be padded out with
+spaces.  Defaults to "DST "
+
+Examples:
+BST  - British Summer Time
+EDST - Eastern Daylight Saving Time
+@endnode
+
+@node gadget-int "Int: gadget"
+Setting this to a positive integer will activate FACTS' Time INTerval check
+option.  Every n minutes, FACTS will attempt to make a connection to the
+specified server and set your clock using the settings specified in the
+@{"Write Time To" link settings-writetimeto} menu.
+
+This is probably most useful for permanent network connections, or if you do
+not have the ability to automatically run a script when connecting to a
+dial-up Internet provider.
+
+Defaults to "720" (autocheck every 12 hours)
+@endnode
+
+@node gadget-adjust "Adjust: button"
+Clicking this will cause FACTS to log on to the @{"specified server" link gadget-addr} and
+set your system time or BattClock acording to the settings in the
+@{"Write Time To" link settings-writetimeto} menu.
+@endnode
+
+@node gadget-check "Check: button"
+Clicking this will cause FACTS to log on to the specified server and display
+the current time on both the server and your Amiga, and the time difference
+between the two.  Please use this to test different settings and servers.
+@endnode
+
+@node gadget-defport "Def[ault Port] Checkbox"
+When ticked, FACTS will connect to the default port number for the
+@{"specified service" link settings-service}.
+
+The default port numbers are verified with your TCP/IP stack on startup.
+@endnode
+
+@node menu-project "Project Menu"
+@{u}@{bg shine} @{"Project" link menu-project} @{"Settings" link menu-settings} @{"Special" link menu-special}                                                  @{bg back}@{uu}
+
+ @{"Server Info... " link project-serverinfo}
+ @{"---------------" link menu-sep}
+ @{"About...       " link project-about}
+ @{"---------------" link menu-sep}
+ @{"Hide           " link project-hide}
+ @{"Quit...        " link project-quit}
+@endnode
+
+@node menu-sep "Menu Separator Bar"
+This is only a button for cosmetic purposes.
+@endnode
+
+@node project-serverinfo "Project: Server Info..."
+@{"NTP Server Information" link sntpinfo} (only displays after time has been obtained)
+@endnode
+
+@node sntpinfo "NTP Server Information"
+The first server information requester displays the following - most of the
+information is only available if using the SNTP service.
+
+@{b}IP Address@{ub}
+This is the Internet address of the polled server
+
+@{b}Stratum@{ub} @{i}sntp only@{ui}
+This is the server's stratum (lower stratum servers are more accurate)
+
+@{b}Reference@{ub} @{i}sntp only@{ui}
+This indicates the synchronisation source for the polled server.  For Stratum
+0 and 1 servers, it will be a four-character ID string.  For other stratums
+it will be the IP address of the server.
+
+@{b}Precision@{ub} @{i}sntp only@{ui}
+Indicates the precision of the server (as 2^x seconds).  -6 is the precision
+of mains frequency clocks, lower numbers are more accurate.
+
+@{b}Poll Interval@{ub} @{i}sntp only@{ui}
+This shows the minimum poll interval (in seconds) for the polled server.
+(This is for information only, and has no bearing on FACTS)
+
+@{b}Root Delay@{ub} @{i}sntp only@{ui}
+This indicates the "total roundtrip delay to the primary reference source"
+(whatever that means)
+
+@{b}Root Dispersion@{ub} @{i}sntp only@{ui}
+This shows the maximum error (in seconds) relative to the primary reference
+source.
+
+@{b}Leap Second@{ub} @{i}sntp only@{ui}
+This only shows if there is an extra second to be added or removed at the
+end of the current day.
+FACTS acts on this information if @{"Obey Leap Seconds" link settings-leapsec} is set.
+
+@{b}ALARM!@{ub} @{i}sntp only@{ui}
+This shows that the server is currently not synchronised or has not been
+synchronised within the last 24 hours.  If a server reports this, FACTS will
+not set your computer clock. (facts also reports "alarm condition" in the
+@{"server" link gadget-server} display)
+
+@endnode
+
+@node project-about "Project: About..."
+Shows some program information, including the dates of your data files (if
+available)
+@endnode
+
+@node project-hide "Project: Hide"
+Closes the GUI, but does not quit FACTS.  The GUI may be re-opened by
+pressing the current @{"hotkey" link tooltypes} or by using the Commodities Exchange
+@endnode
+
+@node project-quit "Project: Quit..."
+This will close the GUI and completely remove FACTS
+from memory.
+@endnode
+
+@node menu-settings "Settings Menu"
+@{u}@{bg shine} @{"Project" link menu-project} @{"Settings" link menu-settings} @{"Special" link menu-special}                                                  @{bg back}@{uu}
+          @{"Write Time To      »" link settings-writetimeto}
+          @{"Auto DST           »" link settings-autodst}
+          @{"  Obey Leap Seconds " link settings-leapsec}
+          @{"  Ignore TZ Changes " link settings-ignoretz}
+          @{"Service            »" link settings-service}
+          @{"Timeserver Offset  »" link settings-tzoffset}
+          @{"  Check On Startup  " link settings-checkonstartup}
+          @{"  Save Time To Env: " link settings-timeenv}
+          @{"On Error           »" link settings-aninc}
+          @{"Compatibility       " link settings-compatibility}
+          @{"  AppMenu Item      " link settings-appmenu}
+          @{"  Extra Half Hour   " link settings-extrahalfhour}
+          @{"  Show Updating Time" link settings-update}
+          @{"--------------------" link menu-sep}
+          @{"  Snapshot Window   " link settings-snapshotwindow}
+          @{"Save Settings       " link settings-savesettings}
+
+@endnode
+
+@node settings-writetimeto "Settings: Write Time To"
+This selects where FACTS should write the time to after obtaining it. 
+Available settings are:
+
+@{b}System@{ub}
+This writes the time to the system, and will be lost after a reboot.
+
+@{b}BattClock@{ub}
+This writes the time to a battery backed-up clock, which will survive a
+reboot.
+
+The actual setting you choose here will depend on your circumstances. 
+Please see @{"example configurations" link exconfig} and @{"known bugs" link bugs}
+@endnode
+
+@node settings-autodst "Settings: Auto DST"
+A feature of FACTS is its ability to switch between summer and winter time. 
+
+It can alter none, some or all of the following automatically:
+
+* TZ env-var
+* System time
+* BattClock time
+
+It can also indirectly modify other programs, if any of the following is
+true:
+
+* The program checks the TZ env-var for DST (this is what FACTS does)
+* The program supports SummertimeGuard (only if STG emulation is on)
+* The program directly supports Facts DST env-var (eg. newer versions of YAM)
+
+However, what the author of STG @{b}doesn't@{ub} tell you, is that if you
+stop using it, YAM (and any other program which supports it) will still
+think you are using it.
+
+FACTS actually suffers from the same fate.  However, if you DISABLE the
+emulation, it will delete the appropriate files and YAM will let you change
+the setting manually again.
+
+It is important to always DISABLE STG emulation if you stop using FACTS or
+only use it from the command line (running FACTS from the CLI never emulates
+STG)
+
+Please note that the file written by FACTS may not be exactly the same as
+one written from STG.  FACTS also writes a country code of "NT" (for
+"Network Time", nothing to do with a version of the "popular" OS), which can
+potentially confuse some programs.  Also note that FACTS @{b}never@{ub}
+reads the file, and you can't use STG to change the DST state, and expect
+FACTS to pick up on this and correct the TZ env-var. (why would you want to
+run STG @{b}AND@{ub} FACTS at the same time anyway?)
+
+The following countries are supported by AutoDST:
+
+@{i}Australia (Sydney/Melbourne)@{ui}
+DST Starts: Last Sunday in October, at 2:00
+DST Ends: Last Sunday in March, at 2:00
+
+@{i}Tasmania/New South Wales@{ui}
+DST Starts: First Sunday in October, at 2:00
+DST Ends: Last Sunday in March, at 2:00
+
+@{i}Azerbaijan@{ui}
+DST Starts: Last Sunday in March, at 1:00
+DST Ends: Last Sunday in October, at 1:00
+
+@{i}Brazil@{ui}
+DST Starts: Second Sunday in October, at 0:00
+DST Ends: Third Sunday in February, at 0:00
+
+@{i}Canada/Thule/Newfoundland/Mexico/Bahamas@{ui}
+DST Starts: First Sunday in April, at 2:00
+DST Ends: Last Sunday in October, at 2:00
+
+@{i}Chile@{ui}
+DST Starts: Second Sunday in October, at 0:00
+DST Ends: Second Sunday in March, at 0:00
+
+@{i}Cuba/Turks/Caicos@{ui}
+DST Starts: First Sunday in April, at 0:00
+DST Ends: Last Sunday in October, at 0:00
+
+@{i}Egypt@{ui}
+DST Starts: Fourth Saturday in April, at 0:00
+DST Ends: Last Friday in September, at 23:00
+
+@{i}Europe@{ui}
+DST Starts: Last Sunday in March, at 2:00
+DST Ends: Last Sunday in October, at 3:00
+
+@{i}Falklands@{ui}
+DST Starts: Second Sunday in September, at 0:00
+DST Ends: Third Sunday in April, at 0:00
+
+@{i}Fiji@{ui}
+DST Starts: First Sunday in November, at 2:00
+DST Ends: Last Sunday in February, at 3:00
+
+@{i}Jordan@{ui}
+DST Starts: First Saturday in April, at 0:00
+DST Ends: Third Saturday in September, at 0:00
+
+@{i}Lebanon/Mongol@{ui}
+DST Starts: Last Sunday in March, at 0:00
+DST Ends: Last Sunday in September, at 0:00
+
+@{i}New Zealand@{ui}
+DST Starts: First Sunday in October, at 2:00
+DST Ends: Third Sunday in March, at 2:00
+
+@{i}Paraguay@{ui}
+DST Starts: First Sunday in October, at 0:00
+DST Ends: Last Sunday in February, at 0:00
+
+@{i}Russia/Asia/Kirgizstan@{ui}
+DST Starts: Last Sunday in March, at 2:00
+DST Ends: Last Sunday in October, at 2:00
+
+@{i}United Kingdom@{ui}
+DST Starts: Last Sunday in March, at 1:00
+DST Ends: Last Sunday in October, at 2:00
+
+@{i}United States of America@{ui}
+DST Starts: First Sunday in April, at 2:00
+DST Ends: Last Sunday in October, at 2:00
+
+@{i}Zion@{ui}
+DST Starts: First Saturday in April, at 2:00
+DST Ends: First Saturday in Septemeber, at 2:00
+
+@{i}Custom@{ui}
+Uses the settings specified in @{"tooltypes" link tooltypes} or @{"TZ" link envvar}
+Note that half-hour adjustments/time checks, and absolute dates, are not
+currently supported.  DST rules which use a different calendar will probably
+never be supported.
+
+If your country isn't here, or the above is wrong, please send me the
+information required.
+
+Please note that FACTS checks for DST on startup, and will switch between DST and
+normal time while it is left running.
+
+@endnode
+
+@node settings-leapsec "Settings: Obey Leap Seconds"
+Every so often, it is decided that a "leap second" must be added or removed from standard time in order to keep it in line with the actual time.  The reason for this is simply because the speed of the Earth's rotation changes over time, whereas accurate clocks are "too accurate".
+
+NTP servers send a signal along with the time to tell the client that a leap second is going to be added or removed from the end of the current day.  When you set the "Obey Leap Second" option in FACTS, the program will act on this leap second information and - come midnight - will adjust the time accordingly (note that "AutoDST->Quiet" also affects the notification of leap seconds).
+
+If you have your machine permanently connected to the Internet, with a (fairly short) time interval set in FACTS, there is no need to set this switch.  If you run timing critical programs, please either do not set this switch, or set "Write Time To" to "BattClock" @{i}only@{ui}.  See @{"known bugs" link bugs}
+
+@endnode
+
+@node settings-ignoretz "Settings: Ignore TZ Changes"
+FACTS usually adjusts the time when the timezone information on the GUI, or
+the @{"TZ variable" link envvar-tz} is changed.  Setting this will cause FACTS to
+leave the time as it is.
+@endnode
+
+@node settings-service "Settings: Service"
+FACTS can obtain the current time through a number of different services.
+The menu options are listed in order of preference, and not all servers
+support all services.
+
+@{b}sntp@{ub}
+This is Simple Network Time Protocol, a subset of the full NTP
+specification.  All NTP servers support this - if a server does not support
+this service, then it is almost certainly not linked to the rest of the NTP
+network, and accuracy cannot be guaranteed!  FACTS attempts to synchronise
+your clock as accurately as possible.  Maximum accuracy for system time is
+1µs (1 millioneth of a second), although due to program execution time this
+will lag behind by up to 20ms - still easily accurate enough for most
+people!  The BattClock, however, can only handle accuracy of one second.
+(standard port: 123)
+
+@{b}time/udp@{ub}
+The time protocol does not return time as accurately as SNTP, and does not
+require any extra information about synchronisation.  Can be used to sync to
+a non-NTP machine on a local network.  Accuracy to one second.
+(standard port: 37)
+
+@{b}time/tcp@{ub}
+As time/udp, but uses the TCP protocol instead of UDP.  Use this if your
+network blocks UDP calls.  Accuracy to one second.
+(standard port: 37)
+
+@{b}daytime@{ub}
+This returns time in a human-readable format, and in the local timezone
+instead of as UTC.  Because of this, it takes time for FACTS to parse the
+data and is not as accurate as the other services.  Do not use this unless
+you absolutely have to!
+(standard port: 13)
+@endnode
+
+@node settings-tzoffset "Settings: Timeserver Offset"
+For the use of the @{"daytime" link settings-service} service only, this specifies which timezone the
+server is in.
+@endnode
+
+@node settings-checkonstartup "Settings: Check On Startup"
+When checked, FACTS will attempt to obtain and set your clock as soon as it
+starts up.
+@endnode
+
+@node settings-compatibility "Settings: Compatibility"
+These options can correct various @{"date overflow" link y2k} problems.
+
+@{b}2036 Mode@{ub}
+Enable: After Feb 6, 2036
+Effect: Corrects obtained times to show 2036 instead of 1978
+Reason: sntp/time overflows on Feb 6 2036
+
+@{b}2015 Is Two Digit Base@{ub}
+Enable: 2078 (after 2015 is safe!)
+Effect: Adds 100 years onto times obtained through @{"daytime" link settings-service}
+Reason: Ensures FACTS will interpret @{"daytime" link settings-service} two-digit dates properly
+
+@{b}BattClock 2078@{ub}
+Enable: 2078
+Effect: Will adjust the system time forward 100 years on startup
+Reason: The BattClock only stores two-digit dates
+
+An additional option is @{b}ClockDaemon@{ub}, which will enable FACTS to
+work with ClockDaemon better.
+
+@endnode
+
+@node settings-appmenu "Settings: AppMenu"
+This adds a "Set Time" option to the Workbench Tools menu.
+@endnode
+
+@node settings-timeenv "Settings: Save Time To Env-Var"
+This saves the current timne in 24 hour format to an environmental variable.
+Intended for OS4 users to allow a clock to be added to the WB screen title bar.
+@{"Click here" link envvar-time} for details on how to achieve this.
+
+@endnode
+
+@node settings-aninc "Settings: On Error"
+These settings control what FACTS should do if an error occurs.
+
+@{b}Try Next Server@{ub}
+This will cause FACTS to trawl through the @{"server list" link envvar-timeserver}, which
+can be edited using @{"SLEFF" link sleff}
+
+@{b}Use Aninc@{ub}
+Setting this will enable FACTS 2.7's new Aninc(tm) technology.  This enables
+FACTS to try an alternative local server if a request to the specified one
+fails - without you needing to type in another address!
+
+Please read @{"how does Aninc work?" link aninc} before enabling this.
+
+@{b}Try Next Service@{ub}
+This will cause FACTS to retry the server using the next service.  eg. if a request
+for "sntp" fails, FACTS will try "time/udp".
+
+Setting both "Use Aninc" and "Try Next Service" will cause FACTS to do a
+total of eight time requests before finally giving up.
+
+@endnode
+
+@node aninc "What the FACTS (I said FACTS) is Aninc?!  How does it work?"
+Aninc(tm) technology is Unsatisfactory Software's amazing new invention for
+FACTS 2.7.  It basically allows FACTS to check an alternative local server
+if a request to the specified one fails - without you even needing to know
+the address!
+
+@{b}How it works@{ub}
+
+Aninc(tm) is possible due to the following:
+
+* A lot of sites have more than one NTP server, to allow NTP clients to peer
+  with several servers on the same network.
+
+* Due to the fact the servers are on the same network, they all have the
+  same domain name and are all guaranteed to be local to each other (ie.
+  one server should respond as quickly as another)
+
+* The actual machine names are (obviously) unique.  They tend to be numbered
+  or lettered in order.
+
+All Aninc does is use the specified server name to generate one which may
+exist on the same network.
+
+For example, if you specify the server:
+ntp2a.mcc.ac.uk
+
+FACTS will try this first, but if it happens to timeout or otherwise fail,
+Aninc (if enabled) will kick in and try the server:
+ntp2b.mcc.ac.uk
+
+If this works, great.  If it also fails, then you haven't lost anything.
+In fact, unless you happen to be watching the FACTS GUI then you won't even
+know if Aninc is enabled!
+
+The downside of using Aninc is that FACTS will send a second request if the
+first one fails.  This may slow things down slightly.
+
+Please note that if your usual server is named clock.*, ntp.*, tick.* or
+some other generic name then there will probably be no point in activating
+Aninc.
+
+To enable Aninc, select the @{"Settings->On Error->Use Aninc" link settings-aninc} menu item.
+
+@endnode
+
+@node settings-extrahalfhour "Settings: Extra Half Hour"
+If you live in a country which has a half-hour timezone offset, then you
+should set @{"TZ" link gadget-hrs} to the whole number of hours, and also
+enable this option.
+
+@endnode
+
+@node settings-update "Settings: Show Updating Time"
+This option causes the "Amiga" field in the FACTS GUI to continually update with the
+current time.  Note that this does not affect the updating time on the minimised FACTS
+window.
+
+@endnode
+
+@node settings-snapshotwindow "Settings: Snapshot Window"
+Selecting this before @{"Save Settings" link settings-savesettings} will save the current
+window position along with the config.
+
+To restore the original window position, comment out the WINX, WINY and ZOOMED
+@{"tooltypes" link tooltypes}.
+
+@endnode
+
+@node settings-savesettings "Settings: Save Settings"
+This saves the current settings into @{"env-vars" link envvar} and @{"tooltypes" link tooltypes}.
+
+@endnode
+
+@node menu-special "Special Menu"
+@{u}@{bg shine} @{"Project" link menu-project} @{"Settings" link menu-settings} @{"Special" link menu-special}                                                  @{bg back}@{uu}
+                   @{"Reset BattClock     " link special-resetbattclock}
+                   @{"Read BattClock Time " link special-readbattclock}
+                   @{"--------------------" link menu-sep}
+                   @{"Boredom Relief...   " link special-boredomrelief}
+@endnode
+
+@node special-resetbattclock "Special: Reset BattClock"
+Will reset your battery backed-up clock to 1 Jan 1978.  This should be used
+only if your clock doesn't appear to be working properly.
+
+Identical in operation to SETCLOCK RESET
+
+@endnode
+
+@node special-readbattclock "Special: Read BattClock Time"
+Will read your battery backed-up clock's time and write it back to the
+system.
+
+Identical in operation to SETCLOCK LOAD
+
+@endnode
+
+@node special-boredomrelief "Special: Boredom Relief..."
+An obligatory option found in all Unsatisfactory Software projects, in a
+similar fashion to how Digita always have their "playtime" tool.  Requires
+als.library (Aminet util/libs/als_lib.lha)
+
+@endnode
+
+
+@node future "Gimme more FACTS"
+Well, this is likely to be the last version of FACTS for 68k machines.  It has reached a stage
+where I believe it to be stable and feature-rich as it needs to be.  If anybody wants to update
+it further or finds a bug, then you can still @{"email me" link contact} and I will try to fix it.
+Major updates are however very unlikely.
+
+This does not mean I am going anywhere.  I have a new version of Facts in development
+which is a complete rewrite.  This means that it does not have all the features of Facts r4.91.
+It does however mean that it is specifically written to take advantage of OS4 and will be PPC
+native.  As OS4 is not yet available, it only exists as a small 68k compiled program running on
+OS3.5 (and one that does, most likely, also run on older versions).  Much like Facts4, it
+installs itself as a commodity and runs in the background keeping the time in sync.  There
+is currently no GUI - partly because I haven't implemented it yet, partly due to OS4 Intuition
+changes and partly down to me considering whether to give it a window like Facts4, just
+provide a Dockie, install it only as a new menu or AppIcon on Workbench or leave it completely
+hidden in the background configurable only through tooltypes.  Whichever method, I can't really
+do much until I have an OS4 NDK in my hands (except the last one, which is already done)
+FactsPPC does not currently implement any legacy stuff - ClockDaemon, SummertimeGuard
+emulation, TZ env-var or AutoDST.  I am hoping that the time system of OS4 will be overhauled
+and include DST switching.  I will decide if any of these need to be added at a later date.
+Providing it is stable, and at least the synchronisation part works, I plan for FactsPPC to be
+released as soon as I can compile it for OS4/PPC and test it.  This means when I have an OS4
+machine and NDK.  Additional features and any modifications for it to better work on OS4
+machines will come afterwards.  I would rather not have a program running constantly in the
+background relying on 68k emulation, so my priority is PPC native rather than OS4 enhanced.
+
+I also have the fade... project.  This is "Facts for AmigaDE", and is a scalable client/server
+time sync tool.  It has had quite a few downloads at http://www.amigadev.net but has
+limited usefulness due to being a CLI based tool with no GUI.  Eventually I will add a GUI, but
+the OS4 version of Facts is more important to me so fade has effectively been put on hold.
+
+More information will be put up on my website at http://www.unsatisfactorysoftware.co.uk
+which will soon have a revamped time synchronisation section with separate areas for the
+above three programs.
+
+
+Facts 4 list included for historic reasons and reference purposes:
+Here is a rather hurried list of future enhancements;
+
+* Gateway/Firewall/Proxy server support (unsure how to do this at the moment)
+
+* Anycast mode: connecting to ntp.mcast.net is supposed to return time from
+  any one NTP server connected to that multicast address.  However, it
+  doesn't seem to work quite like that, so if anybody has any knowledge on
+  this I'd be grateful for the help.
+  Update: I've found additional documentation, but not quite what I need.
+
+* Removal of [apparently 20ms (20000µs)] time lag on SNTP.  The actual lag
+  is probably nothing like that, but my simple tests involved console output
+  counted in the time...
+
+* Server mode (unlikely: the accuracy you get from an SNTP server is
+  slightly higher than time/udp, but for the most part using the TCP
+  stack's built-in time/udp server is perfectly adequate)
+  (fade will however be equipped with a server mode - see below)
+
+* Support for SNTP v4 (minor alterations required, unnecessary)
+
+* Full NTP client/server instead of SNTP (this probably won't improve
+  accuracy)
+
+* Rewrite and clean up of parts of the code (I'll probably instead rewrite it
+  for AmigaDE, rather than rewriting the AmigaOS version)
+
+* Cancel button or hotkey to abort connection operations (apologies to the
+  person I promised this to: I still haven't worked out how to do it)
+
+* Configuring the displayed time format (should be handled through locale's
+  time/date options)
+
+* Any ideas?  @{"E-mail me." link contact}
+
+@endnode
+
+@node contact "You can prove anything with FACTS"
+Want to know who to blame for this?
+
+Chris Young, chris@unsatisfactorysoftware.co.uk
+As this is my own domain it should be active indefinitely.
+Alternatively, if you have ICQ, my UIN is 28784166 (note that I rarely
+open this these days)
+
+E-mail me if you use this program, have any ideas for it, problems or...
+anything else.
+
+I'm looking for translators!  If you want to do an official translation of
+FACTS, please e-mail me on the above address.
+
+Also, visit my website at http://www.unsatisfactorysoftware.co.uk/
+It contains a FACTS area for support and latest information about FACTS.
+There is a @{"FAQs" link faqs} page on there, but I don't get many
+questions so it's currently empty!
+
+fade (Facts for AmigaDE) has now been released - this is a SNTP client
+(and in future, also a server) for AmigaDE/intent
+See http://www.unsatisfactorysoftware.co.uk/facts/
+
+@endnode
+
+@node thanks "Thanks to..."
+Thanks to everybody who has offered help, suggestions, bug reports etc.
+
+Especially thanks must go to the following people:
+
+Jeff Pierce for testing FACTS 2.1 betas with TermiteTCP, and not getting
+annoyed when it consistently crashed...
+
+Linus McCabe for helping me track down an annoying bug which wouldn't show
+up on my system.
+
+Raj Joshi for lots of timezone information, and drawing my attention to a
+bug which he didn't know anything about...
+
+Gian Maria Calzolari for the "long tz format" information, testing it and
+writing an ARexx script.
+
+Everybody on comp.protocols.time.ntp, where I managed to start a long
+discussion about the number of seconds between 1900 and 1978...
+
+Eric Bowen who sent me a cake.
+
+And to all the translators:
+Joe Mackay/Pierre-Philippe Brocard (French)
+Knut Brockelt (German)
+Márton Dósa (Hungarian)
+Gernod Schomberg (German Documentation)
+Claire de Lune (French Documentation)
+
+Looking for more translations (and cakes), please!
+@endnode
+
+@node bugs "FACTual errors (groan - Ed)"
+Not a bug as such, but an Amiga problem which I should warn you about.  
+Some programs which do timing query the system time, which is "guaranteed"
+to be unique and monotonically increasing.  As you can imagine, changing the
+system time may cause problems.  Setting it backwards can cause crashes.
+Setting it forwards by large amounts may cause problems with timing
+programs.  Shareware which expires after a certain amount of time may think
+your time is up, and MIAMI MAY DISCONNECT YOU DUE TO INACTIVITY!
+
+If you have any trouble @{b}at all@{ub} with this, please set the @{"default operation" link settings-writetimeto}
+so "System" is NOT checked, but "BattClock" is. This will cause most events
+to adjust your BattClock but leave the system time alone.
+
+Please also see @{"Year 2000 compatibility" link y2k}
+
+@{b}More General Bugs@{ub}
+When using ClockDaemon compatibility mode, the displayed time is sometimes
+incorrect.  However, the clock will be set correctly.
+
+When (un)snapshotting the Facts icon you will get three notifications
+that it has changed.  This is due to how Workbench modifies the icon position
+information.  In normal use this should not cause any problems.
+
+Note that if the clock shows up as an invalid time or "runs away" (ie.
+increases by more than 1 second every second), this is caused by the
+micro-seconds in the system time having been set to an invalid amount
+if this happens to you and you are using the latest version of FACTS,
+REPORT IT TO ME IMMEDIATELY!
+
+@endnode
+
+@node arexx "ARexx Port"
+FACTS has an ARexx port called "FACTS".  The version number shown next to
+some of the commands is the lowest version of FACTS which implements that
+command.  Please use VERSION and REVISION to check your script will work,
+and exit if the user is running an old version of FACTS.
+
+There are a few other standard commands (HIDE, SHOW, QUIT, ENABLE and
+DISABLE) which do the same as clicking buttons on the Commodities Exchange. 
+In addition are the following;
+
+@{b}DSTMODE@{ub} 2.1
+Will return 1 if DST is enabled, 0 otherwise.  Together with AutoDST this
+could be used in scripts to automatically set other program's DST settings.
+
+v2.4 of FACTS has extra functionality on the DSTMODE command: it can toggle
+DST on and off according to the current settings.  This will not work
+terribly well in conjunction with AutoDST!  A '1' turns DST ON, and a '0'
+turns it off.
+
+@{b}GETTIME@{ub}
+If possible, FACTS will connect to the timeserver and return the current
+date and time.  If FACTS is unable to connect for some reason, it will
+return the current system time instead.  The format is as follows;
+Day Mmm dd hh:mm:ss year
+
+@{b}GETGMT@{ub} 4.7 (no need to check revision)
+Same as GETTIME, except the time is returned as GMT/UTC instead of local
+timezone.
+
+@{b}SAVECFG@{ub} 5.7
+Saves the current configuration.
+
+@{b}SERVER@{ub} 5.6
+Changes the current server to that specified.  If the user saves the
+config, this may become their permanent default timeserver, and if the
+specified server cannot be polled, Facts will fall back to the next
+server in the list (which may be the previous default) as per normal
+rules.
+
+v5.7 returns the current server if this command is used with no arguments,
+and can also accept a port number eg. pool.ntp.org:123
+
+@{b}SERVICE@{ub} 5.7
+Changes the current service to that specified (SNTP, TIMEUDP, TIMETCP or
+DAYTIME).  Returns the current service name if called with no arguments.
+
+@{b}SETTIME@{ub}
+Will connect to the timeserver and set the Amiga clock according to the
+current default operation.  If there was an error, RC will be set as;
+1 = No TCP/IP stack
+2 = Cannot connect to server (or not online)
+3 = Error with host name lookup (v2.1)
+4 = Receive operation timed out (v2.1)
+5 = Server not synchronised (v2.2; sntp mode only)
+
+@{b}TIMEOUT@{ub} 5.7
+Changes the current timeout to the number of seconds specified.
+Returns the current timeout if called with no arguments.
+
+@{b}TIMEZONE@{ub} 4.7 (no need to check revision)
+Returns the timezone in standard Internet "date header" format.
+eg one hour east of GMT is returned as +0100
+
+@endnode
+
+@node arexx-scripts "ARexx scripts"
+@{b}correctclock.rexx@{ub} by Chris Young
+This script simply asks FACTS to sync to the current NTP server.
+
+@{b}Facts.miami@{ub} by Gian Maria Calzolari
+Sets time from internet using Miami and Facts.  A more advanced version
+of the above - it is suggested to put this in Miami's "online event" to sync
+your clock every time you go on-line.
+
+@endnode
+
+@node ntpservers "NTP Servers"
+Here is a quick list of open access public NTP servers.  It doesn't pretend
+to be complete or even particulary up-to-date, but it should get you started
+with FACTS.  A lot of ISPs have NTP servers for their customers to use, so
+it is worth checking to see if your provider offers the service.
+
+A full list of public stratum 1 & 2 servers can be obtained from:
+http://ntp.isc.org/bin/view/Servers/WebHome
+
+If your country isn't here, then please check the full lists.
+
+An alternative method of finding an NTP server near you is to use the
+following syntax:
+
+<country code>.public.ntp.get-time.net
+
+or
+
+<country code>.pool.ntp.org
+
+So I could use gb.public.ntp.get-time.net, or uk.pool.ntp.org, for example.
+Information about pool.ntp.org is on the aforementioned website.  
+
+@{u}Physical Location@{uu}                          @{u}Address@{uu}                     @{u}Stratum@{uu}
+America           Washington               tick.usno.navy.mil          1
+Canada            Ontario                  tick.utoronto.ca            2
+Canada            Ottawa                   time.chu.nrc.ca             2 [1]
+England           Manchester               ntp2a.mcc.ac.uk             2
+France            Lyon                     ntp.univ-lyon1.fr           2
+Germany           Berlin                   ptbtime1.ptb.de             1
+Ireland           Dublin                   salmon.maths.tcd.ie         2
+Italy             Torino                   time.ien.it                 1
+Japan             Fukuoka                  clock.nc.fukuoka-u.ac.jp    1
+The Netherlands   Amsterdam                ntp0.nl.net                 1
+New Zealand       Hamilton                 truechimer1.waikato.ac.nz   2
+Norway            Oslo                     fartein.ifi.uio.no          2
+Scotland          Glasgow                  ntp.cs.strath.ac.uk         2
+Slovenia          Ljubljana                biofiz.mf.uni-lj.si         2
+South Africa      Pietermaritzburg         ntp.cs.unp.ac.za            2
+Spain             Altea                    slug.ctv.es                 2
+Sweden            Stockholm                Time1.Stupi.SE              1
+Switzerland       Zurich                   bernina.ethz.ch             2
+
+[1] The website for this is at http://www.nrc.ca/inms/time/whatime.html
+@endnode
+
+@node GettingStarted "Don't freak out until you know The FACTS"
+The first thing you should do after installing FACTS is ensure that your
+timezone is set correctly.  You may already have the @{"TZ env-var" link envvar-tz} set on your
+system, in which case FACTS should already show the correct details.  If
+not, FACTS will (where available) obtain the current timezone from Locale.
+
+On the FACTS GUI, the gadget to the right of "±hrs" should be set to the
+@{b}whole@{ub} number of hours you are @{b}east@{ub} of GMT.  If you live in
+a country with a half-hour offset from GMT, then you must also check the
+@{"Settings->Extra Half Hour" link settings-extrahalfhour} menu item.  Also
+ensure that the DST checkbox is set if you are in summertime, and unset
+otherwise.
+
+Now go on-line and click "Check" on the GUI.  If all goes well, FACTS should
+return the correct time in the @{"Server" link gadget-server} box.  If an error message appears,
+please consult the @{"list of error messages" link msgs}.  If the wrong time
+appears, please ensure that the timezone offset and DST checkbox are set
+correctly, that the @{"Settings->Service" link settings-service} menu is set to "sntp", and that there
+are no checkmarks next to any @{"Settings->Compatibility" link settings-compatibility} options.
+
+Now save the configuration (Right-Amiga+S) and proceed to
+@{"example configuration" link ExConfig} or @{"Clock Synchronisation" link clocksync}
+@endnode
+
+@node msgs "FACTS Error and Other Messages"
+@{b}Not enough memory!@{ub}
+There is not a large enough block of free memory in order to run FACTS
+
+@{b}Cannot connect to server@{ub}
+There was a problem connecting to the specified server.  The server may be
+down, or you may be attempting to connect to an unsupported service.  Check
+the machine name and port number and try again.
+
+@{b}Please start an AmiTCP compatible TCP/IP stack!@{ub} or @{b}No TCP/IP Stack!@{ub}
+FACTS has attempted to make a connection to the Internet, but cannot access
+"bsdsocket.library".  Ensure your TCP/IP stack is started, and is AmiTCP
+compatible.  If in doubt, contact the author.
+
+@{b}Unable to open ...@{ub}
+The specified system file cannot be opened either because it is missing,
+you do not have enough memory or you have an old version.
+
+@{b}FACTS requires ARexx to be active@{ub}
+Start ARexx by double-clicking on the SYS:System/RexxMast icon.
+
+@{b}Error with battery backed-up clock@{ub} or @{b}battclock.resource@{ub}
+The battery backed-up clock could not be found or is not working properly. 
+
+@{b}Looking up host...@{ub}
+FACTS is attempting to resolve the supplied domain name.
+
+@{b}Host unknown@{ub}
+The supplied address was not known by the domain name server.  Check the
+address and try again.
+
+@{b}Temporary error@{ub}
+The domain name server reported a temporary error.  Please try again later.
+
+@{b}Unexpected server failure@{ub}
+A fatal error has occured to the domain name server.
+
+@{b}No IP address for host@{ub}
+The supplied address was known, but does not currently have an Internet
+address.  Try a different host.
+
+@{b}Error with DNS lookup@{ub}
+A general or unknown error has occured during the DNS lookup.  Please ensure
+you are on-line.
+
+@{b}(Attempting to) connect@{ub}
+FACTS is attempting to make a connection to the specified server.
+
+@{b}Connection timed out@{ub}
+The timeout period has been exceeded.  The server is probably busy or there
+is a slow network connection between you and the server.  Try a different
+server, or attempt the connection again.
+
+@{b}Connection refused@{ub}
+The server does not accept connections to the port you have specified. 
+Ensure the port is correct, and that the server supports the service you
+have selected.
+
+@{b}Network unreachable@{ub}
+It is currently impossible to connect to the specified server.  Try again
+later, or try a different server.
+
+@{b}Error connecting@{ub}
+A general, unknown or unspecified error occured during connection.  Check
+the address, service and port number and try again.  If the problem
+persists, please contact the author.
+
+@{b}Receiving data...@{ub}
+FACTS is receiving or waiting to receive data.
+
+@{b}Sending request...@{ub}
+Connection suceeded.  FACTS is sending a request for time to the server.
+
+@{b}Timed out@{ub}
+The receive request timed out according to the timeout setting.
+
+@{b}Alarm Condition@{ub}
+The sntp server you have connected to has not been synchronised in the last
+24 hours.  FACTS has not adjusted your clock.  Try a different server.
+
+@{b}Error writing...@{ub}
+FACTS could not write to the specified file.  Please check that it is not
+write-protected.
+
+If an error appears that is not mentioned on this page, please contact the
+author.
+@endnode
+
+@node tooltypes "Tooltypes"
+Most of the tooltypes can be set with options on the GUI.  Facts will detect changes
+made to its icon information and ask you if you want to reload the config.
+
+@{b}DONOTWAIT@{ub}
+Set this.  Keep it set.  Only affects running FACTS from the WBStartUp
+drawer, and Workbench'll moan if you don't.
+
+@{b}STARTPRI@{ub}
+This tells WB the order in which to load programs in the WBStartUp drawer. 
+Please note that @{"saving settings" link menu-settings} will overwrite this option,
+so please instead ensure that RexxMast has a STARTPRI of more than 0 (or,
+better, execute it in s:user-startup)
+
+@{b}CXPRIORITY@{ub}
+FACTS's priority as a commodity.  Probably safe to set this to something
+ridiculously low.
+
+@{b}CXPOPUP@{ub}
+Set this to "YES" if you want the GUI to appear on startup, and "NO" if you
+don't.  I would suggest setting it to "NO" if you put FACTS in WBStartUp,
+and "YES" at all other times.
+
+@{b}CXPOPKEY@{ub}
+Hotkey combination to pop up FACT's GUI.  The default is "ctrl alt f", which
+probably interferes with FKey's default.  And FTPMount's, come to that.
+
+@{b}CHECKKEY@{ub}
+Hotkey to synchronise the system time.  See @{"several ways to pay" link clocksync}
+
+@{b}TIMEOUT@{ub} OBSOLETE
+Specifies the timeout in seconds for receiving data - now specified in @{"TIMESERVER" link envvar}
+
+@{b}COMMAND@{ub}
+Sets a command to execute after sccessful sync.
+(NB: this option has changed slightly in r4.91!)
+
+@{b}STRATUM1DB@{ub} and @{b}STRATUM2DB@{ub}
+Sets the path and filname of the local servers databases.
+Defaults to PROGDIR:clock1.htm and PROGDIR:clock2.htm
+Should be possible to set to eg. http://www.eecis.udel.edu/~mills/ntp/clock1.htm
+to always consult the server copy of the database, if you have an http-handler installed.
+
+@{b}DEBUG@{ub}
+Do @{b}NOT@{ub} set this unless I tell you to, as strange things @{b}may@{ub}
+happen.
+
+@{u}CUSTOM DST SETTINGS@{uu}
+
+@{b}DSTSTARTMONTH@{ub}
+Month when DST begins, from 1-12
+
+@{b}DSTSTARTWDAY@{ub}
+Day of week when DST begins, 0=Sunday, 1=Monday etc
+
+@{b}DSTSTARTHOUR@{ub}
+Time when DST starts (hours only).  eg. 1 = 1:00am
+
+@{b}DSTSTARTWEEK@{ub}
+Which week in the month DST begins.  0=last, 1=first, 2=second, etc
+
+@{b}HEMISPHERE@{ub}
+Set to "NORTH" or "SOUTH".  If AutoDST isn't working properly, then you've
+set it wrong!
+
+@{b}DSTENDMONTH@{ub}
+@{b}DSTENDWDAY@{ub}
+@{b}DSTENDHOUR@{ub}
+@{b}DSTENDWEEK@{ub}
+
+Specify when DST ends.  See the DSTSTART tooltypes.
+
+
+@{i}The following tooltypes can - and should - be set from the GUI!@{ui}
+
+@{b}WRITETO@{ub}
+Flags: BATTCLOCK, SYSTEM
+Specify more than one option by using the "or" (vertical bar) operator.
+
+@{b}TINT@{ub}
+Specify the time interval between automatic checks in minutes.
+
+@{b}DSTNAME@{ub}
+Specify the name of your summertime.  Please use four characters!
+
+@{b}UTC@{ub} OBSOLETE
+Specifies whether to use UTC, Local or Other timezone.
+
+@{b}AUTODST@{ub}
+Specify AutoDST mode: -1 = custom.  Any other number is the option in the
+AutoDST menu starting from 0 (off) at the top!
+
+@{b}IGNORETZ@{ub}
+Set to stop the clock being adjusted along with the TZ env-var.
+
+@{b}DAYTIMEPORT@{ub}
+Specifies the current TCP port to use for the 'daytime' service.  Defaults
+to 13
+
+@{b}TIMEPORT@{ub}
+Specifies the current TCP port to use for the time/tcp service.  Defaults to
+37
+
+@{b}SERVICE@{ub}  OBSOLETE
+Specifies the current service.
+123 = sntp, 13 = daytime, 37 - time/tcp, 372 = time/udp
+
+@{b}UTCOFFSET@{ub}
+Specifies timeserver's offset from GMT as seconds east.
+
+@{b}SNTPPORT@{ub}
+Specifies the current UDP port for the sntp service.  Defaults to 123
+
+@{b}UDPTIMEPORT@{ub}
+Specifies the current UDP port to use for the time/udp service.  Defaults to
+37
+
+@{b}COMPATIBILITY@{ub}
+Flags option.  Multiple options are separated by vertical bar.
+Options: MODE2036 = 2036 mode
+         BASE2015 = use 2015 as two-digit base
+         BATT2078 = BattClock 2078 correction
+
+@{b}APPMENU@{ub}
+If set, an AppMenu item will appear in the Workbench "Tools" menu.
+
+@{b}EXTRAHALF@{ub}
+If set, an extra half-hour will be added to your whole hour TZ offset.
+
+@{b}QUIETDST@{ub}
+If set, AutoDST will not notify you of the change
+(this also applies to leap seconds - see OBSESSION)
+
+@{b}STGEMUL@{ub}
+If set, SummerTimeGuard emulation will be enabled.
+
+@{b}CHECKONSTARTUP@{ub}
+If set, FACTS will check for the current time on startup.
+
+@{b}DEFPORT@{ub} OBSOLETE
+Specifies that the default port should be used, instead of the #?PORT
+values above.
+
+@{b}ALWAYSUPDATE@{ub}
+Specifies that the "Amiga" time on the GUI should continually update.
+
+@{b}ANINC@{ub} OBSOLETE
+Enables @{"Aninc" link aninc} auto server change system.  See ONERROR.
+
+@{b}ONERROR@{ub}
+Specifies what should be done if an error occurs.
+@{"ANINC" link aninc} and/or NEXTSERVICE.
+
+@{b}OBSESSION@{ub}
+Will enable auto-adjustment of @{"leap seconds" link settings-leapsec} at midnight.
+
+@{b}WINX@{ub} and @{b}WINY@{ub}
+Specifies the position of the GUI in pixels from the left (X) and top (Y).
+
+@{b}ZOOMED@{ub}
+Specifies that the window should be minimised to the titlebar when opened.
+
+@{b}DEFSERVER@{ub}
+Specifies which server Facts should use as the default (see also @{"TIMESERVER" link envvar-timeserver}
+env-var)
+
+@{b}TIMEENV@{ub}
+Specifies that Facts should write @{"ENV:Facts/time" link envvar-time} once a minute.
+
+@endnode
+
+@node envvar "Environmental Variables"
+FACTS writes the following files to ENV: and/or ENVARC:
+
+@{"TZ" link envvar-tz}
+@{"TIMESERVER" link envvar-timeserver}
+@{"SUMMERTIME" link envvar-summertime}
+@{"TIME" link envvar-time}
+@{"DST" link envvar-dst}
+
+@endnode
+
+@node envvar-tz "TZ"
+Miami requires you to set this, as do several other programs - in other
+words, you probably already have it set.
+
+If not, here's what the ENV:TZ file should contain;
+
+A three-character timezone code (eg. GMT, EST, WET), followed by a number
+showing the offset from GMT.  If you are x hours behind GMT, then the number
+should be positive, @{b}not@{ub} negative.  If you are ahead of GMT, then
+the number should be @{b}negative@{ub}.
+
+During daylight saving time (DST), an extra code is added.  The first part
+is identical to before (except the offset, which is -1 from the previous
+value), and an additional three or four character code showing the DST name
+is added to the end.  eg. during British Summer Time, I use the TZ string
+GMT-1BST 
+
+If the TZ variable is not set, then FACTS will default to not adjusting the
+time obtained from the server - usually this is UTC (GMT).
+
+A better description of ENV:TZ can be found in the @{"Miami docs" link "Miami:Miami.guide/NODE_ENVVARS_TZ"}
+
+Please note that if you live in a "half hour" timezone, you should only set
+the whole number of hours here.
+
+There is also a "long" version of ENV:TZ, which can be specified on the
+GUI by selecting Settings->AutoDST->Long TZ Format
+This includes all the DST timezone information in addition to the above.
+
+@endnode
+
+@node envvar-timeserver "TIMESERVER.#"
+In these variables, FACTS stores the NTP server addresses.  The files are
+suffixed with a number, which indicates the order they appear in the list.
+The first server FACTS tries can be configured by setting the DEFSERVER
+@{"tooltype" link tooltypes}.  The server lists can be maintained by using @{"SLEFF" link SLEFF}.
+
+Format:
+ADDRESS:PORT[:SERVICE[:TIMEOUT]]
+
+Example:
+ntp2a.mcc.ac.uk:37:37:60
+
+Specifies that FACTS should connect to server ntp2a.mcc.ac.uk, on port 37
+using the time/tcp service with a timeout of 60 seconds.  Service and Timeout
+are optional - if not specified, FACTS will use the port number as the service
+number, and a timeout of 60 seconds.
+
+Service numbers:
+
+13 - daytime
+37 - time/tcp
+372 - time/udp
+123 - sntp
+
+@endnode
+
+@node envvar-summertime "SUMMERTIME"
+Written by SummertimeGuard, this defines almost every aspect of timezone
+information.  FACTS only @{b}writes@{ub} this files, it never reads it.
+
+Format:
+     {          DST START         } {           DST END          }
+Code:Offset:Week:Weekday:Month:Time:Week:Weekday:Month:Time:Offset:Status
+
+Where all time values are in @{b}minutes@{ub}.  The week specifies the week
+number in the month, ie. 1 is the first week, 2 the second, etc.  0
+indicates the last week.
+
+Code is a two-character country code.  FACTS always writes "NT" here (for
+"Network Time")
+
+Status is the current status of DST: YES or NO
+@endnode
+
+@node envvar-time "Facts/time env-var"
+Facts writes the current time (24 hour HH:MM format) to ENV:Facts/time if
+"Save Time To Env-Var" is set.
+
+Users of OS4 "pre-release update 1" or higher can then use this to add a clock
+to the WB screen titlebar.
+
+To do this, follow the following steps:
+
+1. Ensure @{b}Save Time To Env-Var@{ub} is switched on (and the settings have
+been saved)
+
+2. Open Workbench prefs, and add @{b}%e facts/time@{ub} to the Screen Title
+Format string
+
+@endnode
+
+@node envvar-dst "Facts/DST env-var"
+ENV:Facts/DST contains a single byte.
+
+00 = Timezone currently out of DST
+01 = Timezone currently in DST
+@endnode
+
+@node y2k "Year 2000 Compatibility"
+@{b}FACTS IS YEAR 2000 COMPATIBLE!@{ub}
+
+It is also "Jan 19 2046, 03:14:08" compatible.  However, there are a few
+issues surrounding dates and the Amiga/UNIX/NTP which will affect FACTS;
+
+Some of this information comes from the Y2k White Paper at Amiga
+(used to be at http://www.amiga.de/diary/developers/092098-y2k.html)
+
+@{b}'daytime' service@{ub}
+
+This is Year 2000 compatible, but unfortunately there appears to be two
+different date formats which they transmit.  One type will be fine, but the
+other only sends two digits for the year.  Therefore, FACTS takes the first
+two digits as "20" if the year is below 78, and as "19" if it is above "78".
+This will cause a problem in the year 2078, but can be fixed by selecting
+the compatibility setting @{"Use 2015 As 2 Digit Base" link settings-compatibility}
+
+@{b}NTP (time and sntp services)@{ub}
+
+NTP servers measure time by the number of seconds passed since Jan 01, 1900.
+The largest value this can hold is Feb 07 2036 06:28:18, so while NTP is
+quite able to cope with that FACTS will think it's 1900 again.  Since the
+Amiga can't actually go back earlier than 1978, there's no telling what this
+will do.  After this date, please select the compatibility setting
+@{"2036 Mode" link settings-compatibility}
+
+@{b}UNIX@{ub}
+
+UNIX usually measures time as the number of seconds since 1970: when this
+clocks over (in about 2107) it could have a diastrous affect on NTP;
+especially considering the time services measure time from a different
+base (it is likely to start transmitting negative time!).  No fix.  I doubt
+this will actually happen.
+
+@{b}Feb 07, 2114@{ub}
+
+The Amiga measures time by the number of seconds passed since Jan 01, 1978. 
+The largest number of seconds it can hold equates to Feb 07 2114 06:28:15,
+so after this time the clock will reset to Jan 01 1978, 00:00:00.  There is
+nothing I can do about this, and I very much doubt that anybody will still
+be using Classic Amigas and FACTS when that time comes.
+
+@{b}BattClocks@{ub}
+
+Battery backed-up clocks only store the year as two digits.  Therefore, even
+though FACTS can cope until the year 2114, a reboot will cause the system
+to think it is 2014.  More specifically, in 2078 the clock will think the
+year is 1978 (and in 2079, the clock will think it's 1979 etc).
+
+Still, if you've got FACTS running and your Amiga permanently connected to
+the Internet (presumably all Internet access and local phone calls will be
+free by the year 2078), then FACTS will actually help to fix this problem...
+
+However, by setting the compatibility mode @{"BattClock 2078" link settings-compatibility}
+FACTS will adjust the clock appropriately at startup.
+
+@{b}Version command@{ub}
+
+The version command distributed with Workbench 3.0 and 3.1 is @{b}not@{ub}
+Year 2000 compatible.  For example, the date 03.01.2000 will show up with
+these commands as either 09.02.2036 or 30.07.1994 (depending on whether the
+creator has used two or four digits for the date).  If this happens to you, please
+upgrade your version command to v40.3 found on http://www.amiga.de/
+
+I've included the update archive in version 3.0 of FACTS, for people who are
+unable to access Amiga's website.  This is a one-off inclusion, and will not
+be available in any further FACTS archives.
+@endnode
+
+@node cliusage "CLI Usage"
+To use FACTS from the CLI, you simply need to issue the command:
+
+FACTS
+
+This will connect to the server specified in @{"ENV:TIMESERVER" link envvar-timeserver} and
+adjust your clock.
+
+@{"CLI parameters" link cliparams}
+@endnode
+
+@node cliparams "CLI Parameters"
+TEMPLATE: FACTS SERVER,PORT/K,SNTP/S,TIMETCP/S,TIMEUDP/S,DAYTIME/S,EXTRAHALF/S,
+AUTODST/K,GUI=STAYRESIDENT/S,INT=TIMEINTERVAL/K,OPENWIN=OPENGUI/S,CX_POPKEY/K,
+CLOCKDAEMON/S
+
+SERVER:  Address of NTP server to use
+
+PORT: Port number to connect to.  If service is not specified, then FACTS
+will connect to the service normally associated with this port.
+
+SNTP: Use SNTP service
+
+TIMETCP: Use time/tcp service
+
+TIMEUDP: Use time/udp service
+
+DAYTIME: Use daytime service
+
+Please note that specifying a service without also specifying a port number
+will connect to the default port for that service.
+
+EXTRAHALF: Will add/subtract an extra half hour from your timezone.
+
+AUTODST: Check DST according to the country specified (country is a number
+from 1 in the order they appear in the AutoDST menu)
+
+CLOCKDAEMON: Uses ClockDaemon compatibility mode.
+
+GUI: Checks time as usual, and then keeps FACTS in memory.  If you use this,
+FACTS should be started in the background (it will @{b}not@{ub} detach
+itself from the CLI)
+
+The following options only make sense if "GUI" is specified...
+
+INT: Specifies the time interval between checks.
+
+OPENWIN: Opens the FACTS window rather than keeping it hidden.
+
+CX_POPKEY: The hotkey to popup the FACTS GUI
+
+(yes, I know that I'm supposed to support all three standard commodities
+tooltypes...)
+@endnode
+
+@node ExConfig "Example Configuration"
+@{b}United Kingdom; dial-up connection; BattClock installed@{ub}
+
+Set your timezone string to:
+
+(if not in summer time)
+@{"GMT" link gadget-tz} @{"±hrs" link gadget-hrs} "0" @{"DST" link gadget-dst} unset
+
+(in summertime)
+@{"GMT" link gadget-tz} @{"±hrs" link gadget-hrs} "0" @{"DST" link gadget-dst} set @{"BST " link gadget-dstname}
+
+The ±hrs settings may change when you click the DST checkbox.  It is
+important to make sure the entire line shows the correct values.
+
+In @{"Addr:" link gadget-addr}, type @{"ntp2a.mcc.ac.uk" link ntpservers}
+
+In the @{"settings menu" link menu-settings}, set:
+@{"AutoDST" link settings-autodst}       -> Europe/UK
+@{"Service" link settings-service}       -> sntp
+@{"Write Time To" link settings-writetimeto} -> BattClock
+                 System
+@{"Aninc On Error" link settings-aninc}
+
+Also set @{"AutoDST" link menu-settings} -> Emulate SummerTimeGuard, if you use YAM2.  Otherwise, leave it unset.
+
+@{b}Always test your configuration by clicking on @{"Check" link gadget-check} before
+saving settings@{ub}
+
+Select @{"Settings" link menu-settings} -> @{"Save Settings" link settings-savesettings}
+
+If something doesn't work properly, @{"contact the author!" link contact}
+More example configurations are welcomed.
+@endnode
+
+@node clocksync "Clock Synchronisation"
+This section deals with setting your Amiga up to keep the clock synchronised.
+Technical details about NTP and clock synchronisation can be found in the
+@{"NTP Technical Information" link ntptechinfo} section.
+
+There are several ways to keep your Amiga's clock in sync with NTP time. 
+Some good, some not so good.  Here's how: take your pick from the following;
+
+It is recommended to put FACTS in your WBStartUp drawer, with the @{"CXPOPUP" link tooltypes}
+tooltype set to "NO", and the @{"default operation" link settings-writetimeto} set to "BattClock"
+or both "BattClock" and "System"
+
+For dial-up Internet connections, try to set your time with an ARexx script.
+If on a permanent network connection, Time Interval is probably best.
+
+@{b}ARexx@{ub}
+FACTS has a small ARexx port implementing a few @{"commands" link arexx}. 
+If you have an ARexx script which is run every time you are connected to the
+Internet then simply insert the following line into it;
+
+ADDRESS FACTS 'SETTIME'
+
+@{b}CLI@{ub}
+The old compatible command line interface in FACTS2 can be used in AmigaDOS
+scripts.  If you have an AmigaDOS script or a way of executing a command
+every time you log on to the Internet, then simply add "FACTS" (with the
+appropriate path, if necessary).  See also @{"command line options" link cliusage}.
+
+@{b}Int@{ub}
+The Int (Time Interval) option on the GUI offers a good way of adjusting
+your clock.  I recommend setting it to about 720 minutes (remember to "save
+config").  Every n seconds, FACTS will attempt to connect to the specified
+NTP server and retrieve the time.  Just keep FACTS2 in the WBStartUp drawer
+and set @{"CXPOPUP" link tooltypes} to "NO"
+
+Int can be temporarily disabled by selecting "DISABLE" in Commodities
+Exchange.
+
+@{b}Hotkey@{ub}
+FACTS2 has a hotkey you can press at any time in order to set your system
+time.  You can configure the combination through the CHECKKEY @{"tooltype" link tooltypes}
+
+@{b}Tools Menu@{ub}
+While FACTS2 is running, it has an item in the Workbench "Tools" menu called
+"Set Time".  Selecting this will connect and set your system time.  See also
+@{"AppMenu Item" link settings-appmenu} menu.
+
+@{b}GUI@{ub}
+The GUI has a button marked "Adjust": clicking this will set your system and
+BattClock time. (subject to the @{"Write To" link menu-settings} setting.
+
+@{b}Third Party@{ub}
+Using a scheduling utility such as Docket (Aminet util/cdity/Docket.lha),
+you can gain more power than the standard "Int" option.  Use a command line
+like sys:rexxc/rx ADDRESS FACTS 'SETTIME'
+
+@endnode
+
+@node ntptechinfo "NTP Technical Information"
+I'll write this section when I'm in the right mood.  For now, consult the
+NTP RFC (I would quote the number, but I appear to have lost my copy of the
+document)
+@endnode
+
+@node FAQs "Frequently Anticipated Questions"
+Notice the title!  These are questions I expect to be asked, in order for me
+not to get swamped with them!
+
+@{b}Q. I installed FACTS, but now YAM2 won't let me change the DST switch!
+What's going on?@{ub}
+
+You have the "Emulate SummertimeGuard" option enabled.  YAM2 should switch
+DST automatically when this is enabled.  However, if you have enabled the
+emulation and then disabled AutoDST, the STG files will still be on disk and
+YAM2 will believe STG to still be installed.  If you stop using FACTS or use
+FACTS/AutoDST from the command line only, please DISABLE "Emulate
+SummertimeGuard", DISABLE "AutoDST" and/or DELETE "ENVARC:SUMMERTIME".
+
+@{b}Why is the obtained time clearly incorrect?@{ub}
+
+If upgrading from an older version of FACTS, then please ensure that all the
+settings are what you expect them to be, and try again.
+
+Check that the following settings are correct:
+
+@{"TZ ±hrs" link gadget-hrs}
+Should be set to the number of hours your timezone is ahead of GMT.
+eg. America should have a negative figure here, Europe positive.
+
+@{"Compatibility modes" link settings-compatibility}
+If the current year is before 2015, then none of these should be set. 
+Otherwise, refer to the compatibility mode settings.
+
+@{"Services" link settings-service} and @{"Ports" link gadget-port}
+Check that the selected service is available on the specified port number. 
+For example, connecting to sntp on port 37 is generally expected to produce
+strange results!
+
+The default ports for each service are as follows:
+
+sntp:     123
+time/udp: 37
+time/tcp: 37
+daytime:  13
+
+If these do not work, contact the server administrator.
+
+Also, make sure you don't have a DST/timezone patch installed which expects
+the system time to be one thing, and patches any calls to the correct time
+(eg. the one with ixemul).  If you have, you may need to set your timezone
+to ± 0 hrs (GMT) or leave the DST checkbox permanently unchecked.
+
+If you still have problems, please @{"contact me" link contact}.
+
+@{b}Q. Does FACTS work on OS3.5/3.9?@{ub}
+
+FACTS works on WB3.5 and OS4 with no problems, and I have had no reports of
+it failing on OS3.9.  The GUI will remain GadTools as this keeps it
+compatible with OS2.04.
+
+@{b}Q. Will there be a PPC/OS4 version of FACTS?@{ub}
+
+I have a new implementation of FACTS (currently known as factsppc) in
+development.  This will be OS4/PPC only and currently only contains a subset
+of the features available in FACTS 4.91.  Providing the synchronisation works
+and is stable, factsppc will have an initial release as soon as I have an OS4
+machine and a PPC C compiler.  This will probably not have AutoDST
+switching at first, as I am hoping this will be part of the OS.
+(factsppc has been shelved until further notice)
+
+@{b}Q. Will there be an AmigaDE version of FACTS?@{ub}
+
+Already exists!  The program is called "fade" and although it is nowhere
+near as advanced as FACTS yet it can still synchronise the clock on any
+device with an AmigaDE Shell.  Due to the fact it needs Shell access, and
+a full AmigaDE/intent installation, the amount of devices it will run on
+is rather limited.  It will eventually be scaleable from PDAs to servers
+(including all sorts of time daemons), but for the moment as far as servers
+are concerned, this is likely to be an OS4/PPC project.
+(fade is no longer in development)
+
+@{b}Q. What is "SLEFF"?@{ub}
+
+It's a Server List Editor For Facts.  Rubbish name, I know.  There isn't
+much in the way of documentation for it at the moment, except a bit of
+a warning @{"here" link sleff}
+
+@endnode
+
+@node cxexchange "Commodities Exchange"
+Workbench's Commodities Exchange tool affects FACTS in the following ways:
+(this is based on WB3.0's Exchange - the earlier 2.0 version is laid out and
+worded slightly differently)
+
+Select "FACTS" from the list, and "Information" will show the title and a
+description for it.  After selecting, the following buttons will become
+active:
+
+@{b}Show Interface@{ub}
+Pops up the FACTS GUI.  Same as pressing the hotkey, or double-clicking on
+the program icon.
+
+@{b}Hide Interface@{ub}
+Hides the FACTS GUI.  Same as selecting @{"Project" link menu-project}->@{"Hide" link project-hide}.
+
+@{b}Active/Inactive@{ub}
+Disabling FACTS, will stop the @{"Time Interval" link gadget-int} check from working, will
+stop FACTS from @{"checking DST" link settings-autodst}/@{"leap seconds" link settings-leapsec} automatically and will stop the updating clock (if active).
+
+@{b}Remove@{ub}
+Quits FACTS silently.
+@endnode
+
+@node history "Old FACTS"
+@{u}Release 5.10@{uu} (25.06.2021)
+
+* Improvements to comply with NTP pool usage
+- Added DNS caching
+- Supported KoD
+- Set a sensible time interval default (12 hours)
+* Time interval is now in minutes.  Please check your values are still sensible.
+  NB: 240 minutes is sensible, 1 is not.
+  Please use the longest time interval your clock can manage to avoid excess traffic.
+
+
+
+@{u}Release 5.07@{uu} v5.9 (05/10/2012)
+
+* Updated New Zealand DST rules.
+* Fixed a potential crash when adjusting for leap seconds. (untested)
+
+
+@{u}Release 5.06@{uu} v5.8 (13/09/2009)
+
+* Fixed a bug which caused Facts to crash when no TCP/IP stack was running.
+
+
+v5.7 31/03/2007 not released
+
+new arexx commands
+changed server so it accepts a port, and returns the current server if used with no arguments.
+fixed dstmode command so it works "as advertised".  removed dst command as it worked as dstmode with no arguments, and was never in the documentation
+
+
+@{u}Release 5.05@{uu} v5.6 (30/03/2007)
+
+* Updated the USA/Canada internal DST switching dates
+
+* Added SERVER ARexx command
+
+* Updated copyright dates
+
+* Adjusted the AutoDST change so it respects Ignore TZ Changes.  Under OS4
+"final update", if OS4 is set to handle DST changes, you must also set Facts
+to handle DST, but with "Ignore TZ Changes" enabled.
+
+
+@{u}Release 5.04@{uu} v5.5 (22/02/2006)
+
+* Fixed bug causing garbage to display instead of date/time under OS4 pre-release update 4
+
+* Updated copyright dates
+
+@{u}Release 5.03@{uu} v5.4 (01/11/2005)
+
+* Fixed bug causing crash when "Synchronise Now" was clicked after DST change
+
+* Fixed crash in "Server Info" when no data available
+
+(thanks to Stellan for reporting both of these)
+
+@{u}Release 5.02@{uu} v5.3 (13/11/2004)
+
+* Initial 0 now shows on the env-var for minutes <10
+
+* Changed the default time server to pool.ntp.org
+
+* Modified the install script, as OS4's version of Installer is based on v43, and
+  doesn't recognise (trace) and (retrace)
+
+@{u}Release 5.01@{uu} v5.2 (12/10/2004)
+
+* Env-var now updates at :00 rather than some arbitrary value.
+
+
+@{u}Release 5.0@{uu} v5.1 (11/10/2004)
+
+* Added @{"save time to env-var" link settings-timeenv} option, to allow addition of a clock to OS4's WB screen titlebar.
+
+* Changed the server list URL in this doc.
+
+* Removed "published info","download databases", "version/motd" options, saved 10K in the process.
+
+* Major version number bumped to show that this has OS4-specific feature support.
+
+
+@{u}Release 4.93beta@{uu} v4.11beta (19/10/2003)
+
+* Experimental clock drift version
+
+
+@{u}Release 4.92@{uu} v4.10 (26.04.2003)
+
+* Archive change, no new version of FACTS.  Updated documentation slightly to remove time servers
+  that have changed their access policy and added French documentation.
+
+
+@{u}Release 4.91@{uu} v4.10 (25.09.2002)
+
+* Now returns return codes to the CLI as follows:
+    WARN:  Connection errors (host not found etc)
+    ERROR: No TCP/IP stack
+    FAIL:  Library not found
+
+* Changed version numbering system!  I am of the belief that AmigaOS internal
+  version numbering confuses most people.  Is version 4.11 older or newer than 4.2?
+  I have started a new two-tier numbering system - the version numbering will now
+  strictly follow the AmigaOS numbering scheme, ie. I will no longer be using
+  revision 0.  The release numbering will be the more public one - and this will
+  follow the more sensible "version . major-revision minor-revision" scheme.
+  In practice this means that the next major release will be r5.0 with internal
+  version v5.1, and gives me more revision numbers to play with before running out.
+
+* Facts now has notification set up on its icon.  Any changes to facts.info will cause
+  Facts to display a requester asking whether you want to update the configuration or
+  ignore the tooltypes changes.  Updating will lose any changes to the config in Facts,
+  just as saving the config from Facts will overwrite any tooltypes changes on the icon.
+  For some reason using Workbench Snapshot/Unsnapshot on the icon causes THREE notifications
+  to appear - it doesn't occur at any other time, so I think this is caused by WB changing
+  three parameters in the .info file separately rather than all at once.
+
+* The command in the COMMAND tooltype now only executes if the synchronisation was
+  successful.  This allows you to insert the following command to quit Facts after the
+  first successful sync:   rx "address facts 'quit'"
+
+* Fixed some other minor bugs, and changed addresses to reflect new home for Unsatisfactory.
+
+
+@{u}Version 4.9@{uu} (06.04.02)
+
+* Fixed some bugs which would prevent DST switching under certain circumstances
+
+* FACTS now correctly identifies HTTP locations for timeserver databases, and
+  disables the download menu item in this case
+
+* Set the location of the FACTS readme (for version checking) to www.aminet.net
+  so it now works again
+
+
+@{u}Version 4.8@{uu} (25.11.01)
+
+* Fixed a bug with the server lists
+
+* Fixed some serious problems when starting FACTS from the CLI
+
+* Added a couple more CLI arguments (OPENWIN/CLOCKDAEMON)
+
+
+@{u}Version 4.7@{uu} (23.09.01)
+
+* Fixed a bug with DST start week being something other than 0
+
+* Added the ARexx commands GETGMT and TIMEZONE
+
+* Fixed the ARexx VERSION and REVISION commands to show the correct version
+
+* Added Hungarian catalog, modified German catalog
+
+* Added German documentation
+
+* Fixed install script and English documentation
+
+
+@{u}Version 4.6@{uu} (29.07.01)
+
+* Tidied up the Published Info window
+
+* Fixed the Download Databases option, which was attempting to download the same db twice
+
+* Does not check versions when db is specified as an http location
+
+* Added Spanish catalog
+
+
+@{u}Version 4.5@{uu} (20.05.01)
+
+* Fixed two Enforcer hits when the Published Server Info appeared
+
+* Fixed a potential problem where the clock could "run away" or go otherwise screwy.
+
+
+@{u}Version 4.4@{uu} (24.02.01)
+
+* Can now specify where the local copy of the databases are stored (see @{"tooltypes" link tooltypes}
+
+* Minor bugfixes
+
+
+@{u}Version 4.3@{uu} (25.11.00)
+
+* Improved font sensitivity
+
+* Updated Server Info routine to read the new database format
+  (Please update your databases with the "Special => Download Databases" option)
+
+* Fixed a bug with preferences saving
+
+* Other bug fixes/changes
+
+
+@{u}Version 4.2@{uu} (03.11.00)
+
+* Fixed a small problem with loading locale catalogs
+
+* Added a German catalog file
+
+
+@{u}Version 4.1@{uu} (31.08.00)
+
+* Fixed the bug which caused the clock not to be set properly under certain circumstances
+This also caused bizarre problems with other clock software
+
+
+@{u}Version 4.0 [release 4.0a]@{uu} (01.08.00)
+
+* Added support for server lists
+
+* Added a compatibility mode for ClockDaemon
+
+* Now uses identify.library to report some relevant system info in the About box
+
+* Fixed the "clock not always updating" bug (hopefully!)
+
+
+@{u}Version 3.3@{uu} (20.04.00)
+
+* AutoDST can now be switched off (this may have worked, once...)
+
+* Other bug fixes
+
+
+@{u}Version 3.2@{uu} (04.04.00)
+
+* Added a tooltype to execute a command when the clock synchronisation procedure is initiated
+
+* Fixed the miscoloured menu after trying next service
+
+* Fixed LongTZ bug, other longtz improvements/changes
+
+
+@{u}Version 3.1@{uu} (07.02.00)
+
+* Remembers leap seconds, and will check that the time hasn't passed the next time you run FACTS
+
+* Fixed a bug where the Stratum 1 Reference would not display correctly.
+
+
+@{u}Version 3.0@{uu} (06.01.00)
+
+* Now acts upon leap seconds 
+
+* Added "check services exhaustively" feature
+
+* Added "long tz format" options (no more ENV:TZ problems... I hope)
+
+* Improved TIMESERVER config file for better CLI handling and future servers list
+
+* Changed a couple of the DST zones
+  (NB: Please check you are still set to the correct zone if upgrading from a previous version)
+
+* Included a fixed French catalog and new German catalog
+
+* Can now zoom (minimise) the window
+
+* Shows updating time on minimised window and on GUI
+
+* Added "Synchronise Now" option to the notification window about DST
+
+* GUI now adjusts size according to the translation catalog in use
+
+* Fixed a problem with "invisible menus"
+
+* Fixed a long-standing bug in the installation procedure
+
+* Included new ARexx script and WB3.5 GlowIcons style icons
+
+* Included AI's Version 40.3 command  - @{b}one time only@{ub}
+
+
+@{u}Version 2.9@{uu} (21.10.99)
+
+* Fixed the AutoDST switching out of DST early bug (switched out on 1st
+  October, although switching the other way had no problems)
+
+* Fixed the AutoDST Southern Hemisphere bug (was incorrectly being treated
+  same as the North)
+
+* Fixed the AutoDST "adjust while program is running" bug.
+
+* Fixed the garbage gadgets in a couple of requesters
+
+
+@{u}Version 2.8@{uu} (23.07.99)
+
+* Fully localised
+
+* Compensates for network lag
+
+* Changed AutoDST code again.  It now waits for the next time to change,
+  instead of checking every hour (more efficient on resources)
+
+* Snapshot window option added
+
+* Fixed a bug in Save Settings code
+
+
+@{u}Version 2.7@{uu} (26.05.99)
+
+* New default port checkbox
+
+* If a time request fails, the new Aninc(tm) technology can check a second
+  local server without you needing to type any addresses!
+
+* When using SNTP, FACTS will now set your system clock with accuracy to
+  within a few microseconds.
+  (system time only - BattClocks are only ever accurate to 1 second)
+
+* Verifies default port numbers with your TCP/IP stack on startup (if
+  available)
+
+* Made the code a bit shorter.  More code clean up is necessary!
+
+
+@{u}Version 2.6@{uu} (08.05.99)
+
+* Completely re-wrote most of this documentation
+
+* UTC/Local/Menu now adjusts automatically depending on the service
+  selected
+
+* AutoDST now checks at startup and every hour thereafter.
+
+* Fixed a problem with DST adjusting in the wrong direction
+
+* Various other small changes
+
+
+@{u}Version 2.5@{uu} (22.03.99)
+
+* locale.library support (if available):
+     Localisation of day and month names
+     Uses locale timezone information if $TZ not available
+
+* Can check clock on startup
+
+* Can now stay resident when launched from the CLI
+
+* Added loads more DST rules, and an option to customise DST changes
+
+* Added an option to emulate the behaviour of SummertimeGuard
+
+
+@{u}Version 2.4@{uu} (25.02.99)
+
+* Accidentally put the Southern hemisphere DST round the wrong way.  Fixed.
+
+* The DSTMODE ARexx command can now set DST as well as returning it.
+
+* New "quiet" option for AutoDST
+
+
+@{u}Version 2.3@{uu} (22.02.99)
+
+* @{b}MAJOR BUG!@{ub}  When AutoDST was enabled, and you were in the month containing
+  the start of DST, DST would be enabled at the start of the month, and
+  disabled at the end.
+
+* More server info (database)
+
+* "Year 2000"-type compatibility modes
+
+* Support for half-hour timezones
+
+* Ability to check for a newer version of FACTS
+
+* Disable the Tools menu "Set Time" item
+
+* Changed the time display slightly
+
+* Hopefully made this guide a little bit easier to find your way around
+
+
+@{u}Version 2.2@{uu} (22.01.99)
+
+* Now supports the UDP services 'time/udp' and 'sntp'
+
+* AutoDST should now work with American DST changes
+
+* Better command line support
+
+* The usual minor bugfixes
+
+
+@{u}Version 2.1@{uu} (28.12.98)
+
+* Completely re-wrote the connection code to use bsdsocket.library instead
+of the virtual TCP: device.  This will enable FACTS to work with more TCP/IP
+stacks (eg. TermiteTCP)
+
+* Supports the 'time' (tcp) service as well as 'daytime'.
+
+* Can now connect to any port, not just the standard ones.
+
+* Better timezone support and error messages
+
+* Remembers the Server/Amiga/Diff fields when hiding/showing the GUI
+
+* Cleaned up the GUI
+
+* A few bugfixes, including removing the response time stuff because it
+  didn't really seem to work properly
+
+
+@{u}Version 2.0@{uu} (22.11.98)
+
+* GUI
+
+* No longer requires any external programs
+
+* Supports timeservers which transmit in local time
+
+* Attempts to calculate server time lag
+
+* ARexx port
+
+* Check/adjust every n seconds
+
+* Runs as a commodity
+
+* Hotkey to set system time
+
+* Now correctly adjusts for midnight
+
+
+@{u}Version 1.1@{uu} (01.11.98)
+
+* Fixed the bug where $TZ wasn't being closed
+
+* FACTS now adjusts the day, month and even year if the timezone value
+causes the time to increase/decrease over midnight.
+
+* Now uses an internal routine to set the system time, rather than calling
+DATE.
+
+
+@{u}Version 1.0@{uu} (28.10.98)
+
+First release
+@endnode
+
+@node SLEFF
+@{u}Quick guide to the FACTS Server List Editor@{uu}
+
+Operation of SLEFF should be fairly simple, however it is important to watch out
+for the DEL button - this deletes the LAST SERVER IN THE LIST, @{b}NOT@{ub} the
+currently-selected one.
+@endnode
