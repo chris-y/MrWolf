@@ -1867,6 +1867,7 @@ IF signal AND winsig
 
         IF gad.gadgetid=GADG_TIMESERVER
             StrCopy(server,gad.specialinfo::stringinfo.buffer)
+			addrs:=NIL
         ENDIF
         
         IF gad.gadgetid=GADG_PORT
