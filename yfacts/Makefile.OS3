@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS := -Os -N
-LIBS := -lauto -lamiga
+LIBS := -lamiga
 
 OBJS := yfacts.o
 
