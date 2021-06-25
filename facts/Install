@@ -1,0 +1,304 @@
+; $VER: FACTS4Install 1.10 (13.11.2004)
+
+(set #inst-ver (/ @installer-version 65536))
+(if (< #inst-ver 43)
+    (abort "You are running an old version of Installer.\n\n"
+            "Please update to at least version 43.3, available on Aminet.")
+)
+
+(welcome)
+
+(set #ver-verstr (getversion "C:Version"))
+(set #ver-ver (/ #ver-verstr 65536))
+
+(set @default-dest
+    (askdir
+        (prompt "Where would you like to install FACTS?")
+        (help "It is recommended that FACTS be running all the time, so "
+        "WBStartUp is the logical place.\n\n" @askdir-help)
+        (default "SYS:WBStartUp")
+    )
+)
+
+(startup "RexxMast"
+    (prompt "FACTS REQUIRES ARexx to be active when it starts up.  "
+    "To do this, the RexxMast command should be executed in your "
+    "user-startup script.\n\nDoes this need adding? (if you are not "
+    "sure, it is safe to proceed with this anyway)")
+    (help @startup-help)
+    (command "RexxMast >NIL:")
+    (confirm "expert")
+)
+
+(set #already-installed (exists (tackon @default-dest "Facts.info")))
+(set #timeserver-var (exists "ENVARC:TIMESERVER"))
+
+(if #already-installed
+    (
+        (set #facts-vernum (getversion (tackon @default-dest "Facts")))
+        (set #facts-ver (/ #facts-vernum 65536))
+        (copylib
+            (prompt "Please check the version of FACTS you are copying against "
+            "any which might already be installed.")
+            (help @copylib-help)
+            (source "Facts")
+            (dest @default-dest)
+            (optional "askuser" "force" "oknodelete")
+        )
+
+        (if (< #facts-ver 3)
+            (
+                (iconinfo
+                    (prompt "Updating TIMESERVER config file...")
+                    (help @iconinfo-help)
+                    (dest (tackon @default-dest "Facts"))
+                    (gettooltype "SERVICE" "#service")
+                    (gettooltype "TIMEOUT" "#timeout")
+                    (safe)
+                )
+                (set #timeserver (getenv "ENV:TIMESERVER"))
+                (set #extra-config ("%s:%s:%s" #timeserver #service #timeout))
+                (textfile
+                    (prompt "You appear to be updating from a pre-3.0 version of FACTS.\n"
+                                "Do you want to update your TIMESERVER variable to the newer format?\n\n"
+                                "NB: AutoDST settings have also changed - please check and update this manually "
+                                "if necessary")
+                    (help "Although FACTS 3 will read FACTS 2.x TIMESERVER variables, "
+                            "this update procedure will ensure that all your previous prefs are kept "
+                            "intact.\n\n" @textfile-help)
+                    (dest "ENV:TIMESERVER")
+                    (append #extra-config)
+                    (confirm)
+                )
+                (copyfiles
+                    (prompt "Copying ENV: to ENVARC:...")
+                    (help @copyfiles-help)
+                    (source "ENV:TIMESERVER")
+                    (dest "ENVARC:")
+                )
+            )
+        )
+
+        (if (exists "ENVARC:TIMESERVER")
+            (
+                (copyfiles
+                    (prompt "Moving old timeserver variable...")
+                    (help @copyfiles-help)
+                    (source "ENVARC:TIMESERVER")
+                    (dest "ENVARC:FACTS")
+                    (newname "TIMESERVER.0")
+                )
+                (delete "ENVARC:TIMESERVER")
+            )
+        )
+        (if (exists "ENV:TIMESERVER")
+            (
+                (copyfiles
+                    (prompt "Moving old timeserver variable...")
+                    (help @copyfiles-help)
+                    (source "ENV:TIMESERVER")
+                    (dest "ENV:FACTS")
+                    (newname "TIMESERVER.0")
+                )
+                (delete "ENV:TIMESERVER")
+            )
+        )
+    )
+
+    (
+        (copylib
+            (prompt "Please check the version of FACTS you are copying against "
+            "any which might already be installed.")
+            (help @copylib-help)
+            (source "Facts")
+            (dest @default-dest)
+            (infos)
+        )
+
+;        (tooltype
+;            (prompt "Do you want FACTS to run silently in the background?\n\n"
+;            "If you would prefer it to show the GUI on startup, please skip "
+;            "this part.")
+;            (help @tooltype-help)
+;            (dest (tackon @default-dest "Facts"))
+;            (settooltype "CXPOPUP" "NO")
+;            (confirm "expert")
+;        )
+
+    )
+)
+
+        (copylib
+            (prompt "Please check the version of SLEFF you are copying against "
+            "any which might already be installed.")
+            (help "SLEFF is the Server List Editor for FACTS\n\n" @copylib-help)
+            (source "SLEFF")
+            (dest "SYS:Prefs")
+            (infos)
+            (confirm)
+        )
+
+(set #doc-dir
+    (copyfiles
+        (prompt "Do you want to copy the documentation?")
+        (help @copyfiles-help)
+        (source "Docs")
+        (dest "HELP:")
+        (optional "askuser" "force")
+        (infos)
+        (all)
+        (confirm "expert")
+    )
+)
+
+(if (exists "libs:locale.library")
+    (copyfiles
+        (prompt "Select languages you wish to install (English is built in)")
+        (help "FACTS supports locale.library!\n\n" @copyfiles-help)
+        (source "catalogs")
+        (dest "LOCALE:catalogs")
+        (all)
+        (confirm "expert")
+    )
+)
+
+(copyfiles
+    (prompt "Do you want to install the example ARexx scripts in REXX:?\n\n"
+    "See Facts docs for more details")
+    (help @copyfiles-help)
+    (source "Rexx")
+    (dest "REXX:")
+    (optional "askuser" "force")
+    (confirm "expert")
+    (all)
+)
+
+; before we start the new one, ask the user for some basic config options
+
+(set @default-dest (tackon @default-dest "Facts"))
+
+(if (<> #already-installed 1)
+(
+; only ask for basic config info if installing from scratch
+
+(if
+    (<> (exists (cat @default-dest ".info")) 1)
+    (
+        (abort "No Facts icon!") ; this should never happen
+    )
+)
+
+;(trace)
+
+(if
+    (
+        (askbool
+            (prompt "Do you want Facts to pop up with a window on startup?")
+            (help @askbool-help)
+        )
+    )
+
+    (set tt_cxpopup "YES")
+    (set tt_cxpopup "NO")
+)
+
+;(trace)
+
+(set tt_tint
+    (asknumber
+        (prompt "How often do you want Facts to check the time (in seconds)?\n"
+                "Change to 0 if you don't want Facts to automatically synchronise the clock.")
+        (help @asknumber-help)
+        (default 300)
+;        (back (retrace))
+    )
+)
+
+;(trace)
+(set tt_autodst
+    (askchoice
+        (prompt "Please select your location (if listed) or \"Do not check for DST\"")
+        (help @askchoice-help)
+        (choices "Do not check for DST"
+                 "Australia (Sydney/Melbourne)"
+                 "Australia (Tazmania/NSW)"
+                 "Azerbaijan"
+                 "Brazil"
+                 "Canada/Newfoundland/Mexico"
+                 "Chile"
+                 "Cuba/Turks/Caicos"
+                 "Egypt"
+                 "Europe (Mainland)"
+                 "Falklands"
+                 "Fiji"
+                 "Jordan"
+                 "Lebanon/Mongol"
+                 "New Zealand"
+                 "Paraguay"
+                 "Russia/Asia/Kirgizstan"
+                 "United Kingdom"
+                 "United States Of America"
+                 "Zion")
+        (default 0)
+;        (back (retrace))
+    )
+)
+
+;(trace)
+(set tt_defserver
+    (askstring
+        (prompt "Enter the name of a local NTP server\n"
+                "Your ISP may be able to provide you with the name of a local server, "
+                "or leave the default which will randomly select one.")
+        (help "There are several servers listed in the guide.\n\n" @askstring-help)
+        (default "pool.ntp.org")
+;        (back (retrace))
+    )
+)
+
+;(trace)
+
+(set tt_autodst (cat tt_autodst))
+(set tt_tint (cat tt_tint))
+
+(tooltype
+    (prompt "I will now write the specified options to the Facts icon")
+    (help @tooltype-help)
+    (dest @default-dest)
+    (settooltype "CXPOPUP" tt_cxpopup)
+    (settooltype "TINT" tt_tint)
+    (settooltype "AUTODST" tt_autodst)
+    (settooltype "DEFSERVER" tt_defserver)
+)
+
+))
+
+(working "Starting ARexx...")
+
+(run "sys:system/RexxMast >NIL:")
+
+(working "Closing old version of Facts (if running) and starting new one")
+
+(set #rexx-string ("install.rexx %s" @default-dest))
+
+(rexx #rexx-string
+    (prompt "I will now quit any old versions of FACTS")
+    (help "Does what it says!  Needs ARexx to be running.")
+)
+
+(run ("WBRun" @default-dest))
+
+(set #time (getenv "T:TIME"))
+
+(if (> #inst-ver 43)
+    (
+;    (openwbobject @default-dest (safe))
+;    (showwbobject (tackon @default-dest "Facts"))
+    (openwbobject #doc-dir)
+    (showwbobject (tackon #doc-dir "Facts.guide"))
+    )
+)
+
+(exit "Finished!\n\n\nThe current time is\n\n" #time
+"\n\n\nFACTS has been started, please ensure your timezone is set "
+"correctly and then save config." (quiet))
