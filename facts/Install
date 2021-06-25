@@ -1,4 +1,4 @@
-; $VER: FACTS4Install 1.10 (13.11.2004)
+; $VER: FACTS4Install 1.11 (25.06.2021)
 
 (set #inst-ver (/ @installer-version 65536))
 (if (< #inst-ver 43)
@@ -206,10 +206,10 @@
 
 (set tt_tint
     (asknumber
-        (prompt "How often do you want Facts to check the time (in seconds)?\n"
+        (prompt "How often do you want Facts to check the time (in minutes)?\n"
                 "Change to 0 if you don't want Facts to automatically synchronise the clock.")
         (help @asknumber-help)
-        (default 300)
+        (default 720)
 ;        (back (retrace))
     )
 )
