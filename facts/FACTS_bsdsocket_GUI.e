@@ -1073,6 +1073,19 @@ IF debug THEN leapsec:=1 /******* DEBUG *******/
     gettimeport()
     RETURN
 
+	IF pkt.stratum=0 /* KoD */
+		StrCopy(ntptime,pkt.refid,4)
+	   IF wbstart
+            IF winopen
+                Gt_SetGadgetAttrsA(gads[GADG_SERVER],win,NIL,[GTTX_TEXT,ntptime,NIL])
+                SetWindowPointerA(win,[WA_POINTERDELAY,TRUE,NIL])
+            ENDIF
+        ELSE
+            WriteF('KoD: \s\n',ntptime)
+        ENDIF
+        closetcp()
+        RETURN 10
+	ENDIF
 
 
 ENDIF
