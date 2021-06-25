@@ -141,6 +141,7 @@ DEF st1db[512]:STRING,st2db[512]:STRING,nocmd=1,rcode=0,wbarg:PTR TO wbarg
 DEF fver[3]:STRING,frev[3]:STRING,frel[6]:STRING,workbenchbase:PTR TO lib,wbenchMsg:PTR TO wbstartup
 DEF timeenv=0,sdrift=0,sdrifts=0,mdrift=0,mdrifts=0,psecs=0,pmics=0,dadj=0,pdadj=0,guessed=0
 DEF difference=0,lastsyncok=0,forcesync=0
+DEF addrs=NIL:PTR TO sockaddr,addr:sockaddr_in
 
 -> DEF node[5]:ARRAY OF ln,list:PTR TO mlh
 
@@ -680,7 +681,7 @@ ENDPROC
 
 PROC retrievetime()
 DEF servertime:clockdata,sock,conn,size
-DEF remote=NIL:PTR TO hostent,addr:sockaddr_in,addrs=NIL:PTR TO sockaddr
+DEF remote=NIL:PTR TO hostent
 DEF url=NIL:PTR TO in_addr
 DEF fhand
 
@@ -736,6 +737,7 @@ ENDIF
     	WriteF(' \s...\n\n',server)
 	ENDIF
 
+IF addrs=NIL
 	remote := Gethostbyname(server)
 
 	IF remote=0
@@ -775,6 +777,8 @@ url:=remote.addr_list[0] ->[0] in_addr   Inet_addr(remote. etc)
 CopyMem(url,addr.addr,SIZEOF in_addr)
 
 -> CopyMem(remote.addr_list,url,10)
+
+	ENDIF
 
 ENDIF
 
@@ -1068,6 +1072,9 @@ IF debug THEN leapsec:=1 /******* DEBUG *******/
     ENDIF
     gettimeport()
     RETURN
+
+
+
 ENDIF
 
 StrCopy(ntptime,buffer)
