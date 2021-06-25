@@ -463,6 +463,7 @@ IF rcode=0
     dodefop()
     displaytimes()
 ELSE
+	addrs:=NIL /* clear dns cache */
     IF rcode=1
         rcode:=10
     ELSE
@@ -2307,6 +2308,7 @@ IF arexxsig<>NIL
                     IF retrievetime()=0
                         StrCopy(result,displaytimes())
                     ELSE
+						addrs:=NIL
                         ioreq.io.command:=TR_GETSYSTIME
                         DoIO(ioreq)
                         curtime:=ioreq.time.secs
@@ -2318,6 +2320,7 @@ IF arexxsig<>NIL
                     IF retrievetime()=0
                         StrCopy(result,displaytimes())
                     ELSE
+						addrs:=NIL
                         ioreq.io.command:=TR_GETSYSTIME
                         DoIO(ioreq)
                         curtime:=ioreq.time.secs
@@ -2330,6 +2333,7 @@ IF arexxsig<>NIL
                         dodefop()
                         displaytimes()
                     ELSE
+						addrs:=NIL
                         tryalternative()
                     ENDIF
                 ENDIF
@@ -4859,6 +4863,8 @@ REPEAT
         displaytimes()
         IF winopen THEN updategui()
         RETURN
+	ELSE
+		addrs:=NIL
     ENDIF
 ->    servnum:=servnum+1
 UNTIL servnum=s
@@ -4877,7 +4883,8 @@ IF nextservice
         displaytimes()
         IF winopen THEN updategui()
         RETURN
-->    ELSE
+    ELSE
+		addrs:=NIL
 -> >>>>>>>>
     ENDIF
     selectservice()
@@ -4894,7 +4901,8 @@ IF nextservice
         displaytimes()
         IF winopen THEN updategui()
         RETURN
-->    ELSE
+    ELSE
+		addrs:=NIL
 -> >>>>>>>>
     ENDIF
     selectservice()
@@ -4938,6 +4946,7 @@ PROC syncclock(dodef=1)
                     IF dodef THEN dodefop()
                     displaytimes()
                 ELSE
+					addrs:=NIL
                     tryalternative(dodef)
                 ENDIF
 
