@@ -1003,7 +1003,7 @@ CopyMem(temp,buffer+12,EstrLen(temp))
     pkt.orgf:=0
     pkt.recs:=0
     pkt.recf:=0
-    pkt.xmts:=measure.secs+2461449600-tzsecs
+    pkt.xmts:=measure.secs+2461449600+tzsecs
     pkt.xmtf:=Div(Shl(measure.micro,12),1000000)
   ->  pkt.xmtf:=measure.micro*4295
 
@@ -1323,7 +1323,8 @@ IF clkdaemon
 ENDIF
 */
 
-    StrCopy(ntptime,sectostr(servsecs,gmtadj)) ->localdate
+/* note this shows time direct from the server rather than a roundtrip adjusted one */
+    StrCopy(ntptime,sectostr(pkt.xmts-2461449600-tzsecs,gmtadj)) ->localdate
 
 IF guessed
 	StrAdd(ntptime,locstr[MSG_GUESSED])
@@ -1341,22 +1342,6 @@ StrCopy(sysdate,sectostr(curtime))
 -> WriteF('\s (\d)\n',sysdate,curtime)
 
 IF winopen THEN Gt_SetGadgetAttrsA(gads[GADG_AMIGA],win,NIL,[GTTX_TEXT,sysdate,NIL])
-
-
--> IF service <> 123
-
-	servtv.secs:=servsecs
-	servtv.micro:=servmicros
-
-	smeasure:=servtv
-	-> CopyMem(servtv,smeasure,SIZEOF timeval)
-
-
-	SubTime(measure,smeasure)
-	difference:=measure.secs
-
--> difference:=curtime-servsecs
--> ENDIF
 
 IF difference=0
     StrCopy(diffbox,locstr[MSG_DIFF_MATCH])
@@ -3509,7 +3494,7 @@ ENDIF
 ENDPROC
 
 PROC gettimeport()
-DEF dess,desf,ntps,ntpf,rtrips,rtripf,ntpfrac
+DEF dess,desf,ntps,ntpf,rtrips,rtripf,ntpfrac,differencef
 DEF tmp[50]:STRING
 closetcp()
 -> WriteF('\d: ',Long(buffer))
@@ -3520,27 +3505,40 @@ IF service=123
 	curmics:=measure.micro
     /* ioreq.io.command:=TR_GETSYSTIME
     DoIO(ioreq) */
-    dess:=measure.secs+2461449600-tzsecs
+    dess:=measure.secs+2461449600+tzsecs
     desf:=Div(Shl(measure.micro,12),1000000)
 
     -> local clock offset 
     difference := ((pkt.recs-pkt.orgs)+(pkt.xmts-dess))/2
+    differencef := ((pkt.recf-pkt.orgf)+(pkt.xmtf-desf))/2
     -> roundtrip delay
     rtrips := (dess-pkt.orgs) - (pkt.recs-pkt.xmts)
     rtripf := (desf-pkt.orgf) - (pkt.recf-pkt.xmtf)
 
-    servsecs:=pkt.xmts-2461449600+rtrips
-servmicros:=Shr(Mul(pkt.xmtf,1000000),12)+rtripf+500000
+->    servsecs:=pkt.xmts-2461449600+rtrips
+->	servmicros:=Shr(Mul(pkt.xmtf,1000000),12)+rtripf+500000
 
--> WriteF('\d\nrtripf\d\n',servmicros,rtripf)
+->	WriteF('\d.\d (OLD CALC)\n',servsecs,servmicros)
+
+	differencef:=Shr(Mul(differencef,1000000),12)
+	servsecs:=difference + measure.secs
+	servmicros:=differencef + measure.micro
+
+->	WriteF('\d.\d (NEW)\n',servsecs,servmicros)
+
+	difference:= Div((Mul(difference, 1000000) + differencef),1000000)
+
 IF servmicros>999999
     servmicros:=servmicros-1000000
     servsecs:=servsecs+1
 ENDIF
 
 IF servmicros<0
-    servmicros:=0
+    servmicros:=1000000-servmicros
+	servsecs:=servsecs-1
 ENDIF
+
+->	WriteF('\d.\d (NEW ADJ)\n',servsecs,servmicros)
 
 -> servmicros:=Mul(Shr(pkt.xmtf,16),1000000)
 
@@ -3600,9 +3598,10 @@ ENDIF
 
 IF utc=2 THEN response:=response-utcoffset
 
-servsecs:=servsecs-tzsecs+response
+-> not sure what this is doing here servsecs:=servsecs-tzsecs+response
+
 IF extrahalf
-    IF tzsecs<0 THEN servsecs:=servsecs+1800 ELSE servsecs:=servsecs-1800
+   IF tzsecs<0 THEN servsecs:=servsecs+1800 ELSE servsecs:=servsecs-1800
 ENDIF
 
 IF winopen THEN SetWindowPointerA(win,[WA_POINTERDELAY,TRUE,NIL])

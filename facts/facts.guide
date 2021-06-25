@@ -1746,6 +1746,7 @@ Quits FACTS silently.
 * Time interval is now in minutes.  Please check your values are still sensible.
   NB: 240 minutes is sensible, 1 is not.
   Please use the longest time interval your clock can manage to avoid excess traffic.
+* Completely reworked the time calculation for improved accuracy
 
 
 
