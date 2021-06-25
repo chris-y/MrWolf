@@ -3318,7 +3318,7 @@ ENDIF
 
 IF timeint>0
             tioreq.io.command:=TR_ADDREQUEST
-            tioreq.time.secs:=timeint
+            tioreq.time.secs:=timeint*60
             tioreq.time.micro:=0
             SendIO(tioreq)
 ENDIF
