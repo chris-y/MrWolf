@@ -646,11 +646,11 @@ All Aninc does is use the specified server name to generate one which may
 exist on the same network.
 
 For example, if you specify the server:
-ntp2a.mcc.ac.uk
+ntp2a.domain.com
 
 FACTS will try this first, but if it happens to timeout or otherwise fail,
 Aninc (if enabled) will kick in and try the server:
-ntp2b.mcc.ac.uk
+ntp2b.domain.com
 
 If this works, great.  If it also fails, then you haven't lost anything.
 In fact, unless you happen to be watching the FACTS GUI then you won't even
@@ -966,49 +966,8 @@ your clock every time you go on-line.
 @endnode
 
 @node ntpservers "NTP Servers"
-Here is a quick list of open access public NTP servers.  It doesn't pretend
-to be complete or even particulary up-to-date, but it should get you started
-with FACTS.  A lot of ISPs have NTP servers for their customers to use, so
-it is worth checking to see if your provider offers the service.
-
-A full list of public stratum 1 & 2 servers can be obtained from:
-http://ntp.isc.org/bin/view/Servers/WebHome
-
-If your country isn't here, then please check the full lists.
-
-An alternative method of finding an NTP server near you is to use the
-following syntax:
-
-<country code>.public.ntp.get-time.net
-
-or
-
-<country code>.pool.ntp.org
-
-So I could use gb.public.ntp.get-time.net, or uk.pool.ntp.org, for example.
-Information about pool.ntp.org is on the aforementioned website.  
-
-@{u}Physical Location@{uu}                          @{u}Address@{uu}                     @{u}Stratum@{uu}
-America           Washington               tick.usno.navy.mil          1
-Canada            Ontario                  tick.utoronto.ca            2
-Canada            Ottawa                   time.chu.nrc.ca             2 [1]
-England           Manchester               ntp2a.mcc.ac.uk             2
-France            Lyon                     ntp.univ-lyon1.fr           2
-Germany           Berlin                   ptbtime1.ptb.de             1
-Ireland           Dublin                   salmon.maths.tcd.ie         2
-Italy             Torino                   time.ien.it                 1
-Japan             Fukuoka                  clock.nc.fukuoka-u.ac.jp    1
-The Netherlands   Amsterdam                ntp0.nl.net                 1
-New Zealand       Hamilton                 truechimer1.waikato.ac.nz   2
-Norway            Oslo                     fartein.ifi.uio.no          2
-Scotland          Glasgow                  ntp.cs.strath.ac.uk         2
-Slovenia          Ljubljana                biofiz.mf.uni-lj.si         2
-South Africa      Pietermaritzburg         ntp.cs.unp.ac.za            2
-Spain             Altea                    slug.ctv.es                 2
-Sweden            Stockholm                Time1.Stupi.SE              1
-Switzerland       Zurich                   bernina.ethz.ch             2
-
-[1] The website for this is at http://www.nrc.ca/inms/time/whatime.html
+It is highly recommended to use a pool rather than an individual server.
+See ntppool.org for a list of server pools.
 @endnode
 
 @node GettingStarted "Don't freak out until you know The FACTS"
@@ -1346,9 +1305,9 @@ Format:
 ADDRESS:PORT[:SERVICE[:TIMEOUT]]
 
 Example:
-ntp2a.mcc.ac.uk:37:37:60
+ntp2a.domain.com:37:37:60
 
-Specifies that FACTS should connect to server ntp2a.mcc.ac.uk, on port 37
+Specifies that FACTS should connect to server ntp2a.domain.com, on port 37
 using the time/tcp service with a timeout of 60 seconds.  Service and Timeout
 are optional - if not specified, FACTS will use the port number as the service
 number, and a timeout of 60 seconds.
@@ -1543,7 +1502,7 @@ Set your timezone string to:
 The ±hrs settings may change when you click the DST checkbox.  It is
 important to make sure the entire line shows the correct values.
 
-In @{"Addr:" link gadget-addr}, type @{"ntp2a.mcc.ac.uk" link ntpservers}
+In @{"Addr:" link gadget-addr}, type @{"a sensible NTP pool address" link ntpservers}
 
 In the @{"settings menu" link menu-settings}, set:
 @{"AutoDST" link settings-autodst}       -> Europe/UK
