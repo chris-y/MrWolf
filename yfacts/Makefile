@@ -1,13 +1,14 @@
 CC := gcc
-CFLAGS := -Os -N
+CFLAGS := -Os -N -D__USE_INLINE__
 LIBS := -lauto
 
-OBJS := yfacts.o
+OBJS := yfacts.o timesync.o
+DEPS := error.h timesync.h
 
 all: yfacts
 
-$(OBJS): $(OBJS:.o=.c)
-	$(CC) $(CFLAGS) -c -o $@ $^
+%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 yfacts: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)

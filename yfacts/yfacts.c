@@ -8,8 +8,6 @@ strip yfacts
 strip -R.comment yfacts
 */
 
-#define __USE_INLINE__
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -20,15 +18,14 @@ strip -R.comment yfacts
 #include <proto/icon.h>
 #include <proto/wb.h>
 
-#ifdef __amigaos4__
-#include <proto/timesync.h>
-#include <proto/timezone.h>
-#else
+#ifndef __amigaos4__
 #include <clib/alib_protos.h>
 #endif
 
 #include <workbench/startup.h>
 
+#include "timesync.h"
+#include "error.h"
 #include "yFacts_rev.h"
 
 #ifndef __amigaos4__
@@ -37,6 +34,10 @@ strip -R.comment yfacts
 #define SetCurrentDir CurrentDir
 #endif
 
+enum {
+	TSM_LIB = 0,
+	TSM_SNTP
+};
 
 #ifdef __VBCC__
 #define UNUSED
@@ -71,25 +72,24 @@ struct TR_compat /* TimeRequest */
     struct TV_compat   Time;
 };
 
-
 /* Global config */
-int poll = 720;
-int port = 123;
-char *server = NULL;
-BOOL savebc = FALSE;
-BOOL savesys = FALSE;
-const char *default_server = "PREFS\0";
-int panic_warn = 30;
-int firstsync_delay = 0;
+static int mode = TSM_SNTP;
+static int poll = 720;
+static int port = 123;
+static char *server = NULL;
+static BOOL savebc = FALSE;
+static BOOL savesys = FALSE;
+static int panic_warn = 30;
+static int firstsync_delay = 0;
 
 /* Global vars */
-struct MsgPort *msgport;
-struct TR_compat *tioreq;
-CxObj *broker;
-struct MsgPort *broker_mp;
-int panic_mode = 0;
+static struct MsgPort *msgport;
+static struct TR_compat *tioreq;
+static CxObj *broker;
+static struct MsgPort *broker_mp;
+static int panic_mode = 0;
 
-struct NewBroker newbroker = {
+static struct NewBroker newbroker = {
 	NB_VERSION,
 	"YoctoFacts",
 	VERS,
@@ -101,45 +101,54 @@ struct NewBroker newbroker = {
 	0
 };
 
-void show_error(int error, BOOL cli)
+static void show_error(int error, BOOL cli)
 {
-	switch(error) {
-		case TSERR_FAIL:
-			if(cli) printf("Cannot connect to server\n");
+	switch(mode) {
+		case TSM_LIB:
+#ifdef __amigaos4__
+			return timesync_show_error(error, cli);
+#endif
 		break;
-
 		default:
-			if(cli) printf("yfacts returned error %ld\n", error);
 		break;
 	}
 }
 
-int timesync(void)
+static int timesync(void)
 {
-	int err;
-
+	switch(mode) {
+		case TSM_LIB:
 #ifdef __amigaos4__
-	err = RemoteSync(RS_SERVER, server,
-					RS_PORT, port,
-					RS_SETSYSTIME, savesys,
-					RS_SAVETIME, savebc,
-					TAG_DONE);
-#else
-#warning TODO
+			return timesync_sync(server, port, savesys, savebc);
 #endif
-
-	return err;
+		break;
+		default:
+		break;
+	}
 }
 
-void killpoll()
+static char *default_server(void)
+{
+	switch(mode) {
+		case TSM_LIB:
+#ifdef __amigaos4__
+			return timesync_default_server();
+#endif
+		break;
+		default:
+		break;
+	}
+}
+
+static void killpoll()
 {
 	if(CheckIO((struct IORequest *)tioreq)==0) {
-    	AbortIO((struct IORequest *)tioreq);
-    	WaitIO((struct IORequest *)tioreq);
+		AbortIO((struct IORequest *)tioreq);
+		WaitIO((struct IORequest *)tioreq);
 	}
 }
 
-void startpoll(int time)
+static void startpoll(int time)
 {
     tioreq->Request.io_Command=TR_ADDREQUEST;
     tioreq->Time.Seconds = time;
@@ -148,7 +157,7 @@ void startpoll(int time)
 }
 
 /* Sync and start polling, returns FALSE if no new poll set up */
-BOOL timesync_poll()
+static BOOL timesync_poll()
 {
 	if (firstsync_delay) {
 		startpoll(firstsync_delay);
@@ -156,7 +165,7 @@ BOOL timesync_poll()
 		return TRUE;
 	}
 
-	if (timesync() == TSERR_NONE) {
+	if (timesync() == ERR_OK) {
 		panic_mode = 0;
 
 		if(poll > 0) {
@@ -166,7 +175,7 @@ BOOL timesync_poll()
 		}
 	} else {
 		if(panic_mode == panic_warn) {
-#ifdef __amigso4__
+#ifdef __amigaos4__
 			TimedDosRequesterTags(
 				TDR_ImageType, TDRIMAGE_INFO,
 				TDR_TitleString, "YoctoFacts",
@@ -184,7 +193,7 @@ BOOL timesync_poll()
 	return TRUE;
 }
 
-void main_loop()
+static void main_loop()
 {
 	struct Message *msg;
 	ULONG sigrcvd, msgid, msgtype;
@@ -238,7 +247,7 @@ void main_loop()
 	}
 }
 
-void gettooltypes(struct WBArg *wbarg)
+static void gettooltypes(struct WBArg *wbarg)
 {
 	struct DiskObject *dobj;
 	STRPTR *toolarray;
@@ -251,6 +260,14 @@ void gettooltypes(struct WBArg *wbarg)
 		if(s = (char *)FindToolType(toolarray,"PORT")) port = atoi(s);
 		if(s = (char *)FindToolType(toolarray,"DELAY")) firstsync_delay = atoi(s);
 		if(s = (char *)FindToolType(toolarray,"WARN")) panic_warn = atoi(s);
+		if(s = (char *)FindToolType(toolarray,"MODE")) {
+			if(MatchToolValue(s,"LIBRARY")) {
+				mode=TSM_LIB;
+			}
+			if(MatchToolValue(s,"SNTP")) {
+				mode=TSM_SNTP;
+			}
+		}
 		if(s = (char *)FindToolType(toolarray,"SAVE")) {
 			if(MatchToolValue(s,"BATTCLOCK")) {
 				savebc=TRUE;
@@ -261,10 +278,12 @@ void gettooltypes(struct WBArg *wbarg)
 		}
 		FreeDiskObject(dobj);
 	}
+
+	if(server == NULL) server = default_server();
 }
 
 
-BOOL startcx(void)
+static BOOL startcx(void)
 {
 	if(broker_mp = CreateMsgPort()) {
 		newbroker.nb_Port = broker_mp;
@@ -277,7 +296,7 @@ BOOL startcx(void)
 	return TRUE;
 }
 
-void wbcleanup(void)
+static void wbcleanup(void)
 {
 	struct Message *msg;
 
@@ -338,7 +357,7 @@ int main(int argc, char **argv)
 			if(rarray[A_SERVER]) {
 				server = strdup((char *)rarray[A_SERVER]);
 			} else {
-				server = strdup(default_server);
+				server = default_server();
 			}
 
 			if(rarray[A_PORT])
@@ -387,7 +406,7 @@ int main(int argc, char **argv)
 			tioreq= (struct TimeRequest *)CreateIORequest(msgport,sizeof(struct MsgPort));
 			OpenDevice("timer.device",UNIT_VBLANK,(struct IORequest *)tioreq,0);
 
-			if(server == NULL) server = strdup(default_server);
+			if(server == NULL) server = default_server();
 
 			if(timesync_poll()) {
 				main_loop();
