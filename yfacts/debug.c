@@ -18,16 +18,10 @@ static char *debug_default_server(void)
 	return strdup("DEBUG\0");	
 }
 
-static void debug_show_error(int error, BOOL cli)
-{
-	printf("show error %d\n", error);
-}
-
 void debug_register(struct module_functions *funcs)
 {
 	funcs->sync = debug_sync;
 	funcs->default_server = debug_default_server;
-	funcs->show_error = debug_show_error;
 }
 
 

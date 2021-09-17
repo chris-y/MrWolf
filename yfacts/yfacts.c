@@ -107,7 +107,17 @@ static struct NewBroker newbroker = {
 
 static inline void show_error(int error, BOOL cli)
 {
-	return funcs.show_error(error, cli);
+	if(error == ERR_OK) return;
+	
+	switch(error) {
+		case ERR_CONN:
+			if(cli) printf("Cannot connect to server\n");
+		break;
+
+		default:
+			if(cli) printf("yfacts returned error %ld\n", error);
+		break;
+	}
 }
 
 static inline int timesync(void)
