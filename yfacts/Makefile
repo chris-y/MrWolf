@@ -2,8 +2,8 @@ CC := gcc
 CFLAGS := -Os -N -D__USE_INLINE__
 LIBS := -lauto
 
-OBJS := yfacts.o timesync.o
-DEPS := error.h timesync.h
+OBJS := yfacts.o timesync.o debug.o
+DEPS := error.h module.h timesync.h debug.h
 
 all: yfacts
 

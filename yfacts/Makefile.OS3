@@ -2,12 +2,13 @@ CC := gcc
 CFLAGS := -Os -N
 LIBS := -lamiga
 
-OBJS := yfacts.o
+OBJS := yfacts.o debug.o
+DEPS := error.h module.h debug.h
 
 all: yfacts
 
-$(OBJS): $(OBJS:.o=.c)
-	$(CC) $(CFLAGS) -c -o $@ $^
+%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 yfacts: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)

@@ -3,9 +3,10 @@
 #include <proto/timesync.h>
 #include <string.h>
 #include <stdio.h>
+#include "timesync.h"
 #include "error.h"
 
-int timesync_sync(char *server, int port, BOOL savesys, BOOL savebc)
+static int timesync_sync(char *server, int port, BOOL savesys, BOOL savebc)
 {
 	int err;
 
@@ -19,12 +20,12 @@ int timesync_sync(char *server, int port, BOOL savesys, BOOL savebc)
 		else return ERR_UNKNOWN;
 }
 
-const char *timesync_default_server(void)
+static char *timesync_default_server(void)
 {
 	return strdup("PREFS\0");	
 }
 
-void timesync_show_error(int error, BOOL cli)
+static void timesync_show_error(int error, BOOL cli)
 {
 	switch(error) {
 		case TSERR_FAIL:
@@ -35,6 +36,13 @@ void timesync_show_error(int error, BOOL cli)
 			if(cli) printf("yfacts returned error %ld\n", error);
 		break;
 	}
+}
+
+void timesync_register(struct module_functions *funcs)
+{
+	funcs->sync = timesync_sync;
+	funcs->default_server = timesync_default_server;
+	funcs->show_error = timesync_show_error;
 }
 
 #endif

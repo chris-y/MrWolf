@@ -24,7 +24,7 @@ strip -R.comment yfacts
 
 #include <workbench/startup.h>
 
-#include "timesync.h"
+#include "module.h"
 #include "error.h"
 #include "yFacts_rev.h"
 
@@ -35,9 +35,12 @@ strip -R.comment yfacts
 #endif
 
 enum {
-	TSM_LIB = 0,
+	TSM_DEBUG = 0,
+	TSM_LIB,
 	TSM_SNTP
 };
+
+
 
 #ifdef __VBCC__
 #define UNUSED
@@ -73,6 +76,7 @@ struct TR_compat /* TimeRequest */
 };
 
 /* Global config */
+static struct module_functions funcs;
 static int mode = TSM_SNTP;
 static int poll = 720;
 static int port = 123;
@@ -101,43 +105,35 @@ static struct NewBroker newbroker = {
 	0
 };
 
-static void show_error(int error, BOOL cli)
+static inline void show_error(int error, BOOL cli)
 {
-	switch(mode) {
-		case TSM_LIB:
-#ifdef __amigaos4__
-			return timesync_show_error(error, cli);
-#endif
-		break;
-		default:
-		break;
-	}
+	return funcs.show_error(error, cli);
 }
 
-static int timesync(void)
+static inline int timesync(void)
 {
-	switch(mode) {
-		case TSM_LIB:
-#ifdef __amigaos4__
-			return timesync_sync(server, port, savesys, savebc);
-#endif
-		break;
-		default:
-		break;
-	}
+	return funcs.sync(server, port, savesys, savebc);
 }
 
-static char *default_server(void)
+static inline char *default_server(void)
+{
+	return funcs.default_server();
+}
+
+static void register_funcs(void)
 {
 	switch(mode) {
-		case TSM_LIB:
 #ifdef __amigaos4__
-			return timesync_default_server();
-#endif
+		case TSM_LIB:
+			timesync_register(&funcs);
 		break;
+#endif
 		default:
+			debug_register(&funcs);
 		break;
 	}
+	
+	if(server == NULL) server = default_server();
 }
 
 static void killpoll()
@@ -264,8 +260,11 @@ static void gettooltypes(struct WBArg *wbarg)
 			if(MatchToolValue(s,"LIBRARY")) {
 				mode=TSM_LIB;
 			}
-			if(MatchToolValue(s,"SNTP")) {
+			else if(MatchToolValue(s,"SNTP")) {
 				mode=TSM_SNTP;
+			}
+			else if(MatchToolValue(s,"DEBUG")) {
+				mode=TSM_DEBUG;
 			}
 		}
 		if(s = (char *)FindToolType(toolarray,"SAVE")) {
@@ -278,8 +277,6 @@ static void gettooltypes(struct WBArg *wbarg)
 		}
 		FreeDiskObject(dobj);
 	}
-
-	if(server == NULL) server = default_server();
 }
 
 
@@ -356,8 +353,6 @@ int main(int argc, char **argv)
 		if(args) {
 			if(rarray[A_SERVER]) {
 				server = strdup((char *)rarray[A_SERVER]);
-			} else {
-				server = default_server();
 			}
 
 			if(rarray[A_PORT])
@@ -382,6 +377,8 @@ int main(int argc, char **argv)
 		if(rc == 10) {
 			printf("Required argument missing\n");
 		} else {
+			register_funcs();
+			
 			if((err = timesync()) == 0) {
 				if(quiet == FALSE) printf("Clock synchronised\n");
 			} else {
@@ -403,10 +400,10 @@ int main(int argc, char **argv)
 
 		if(startcx()) {
 			msgport = CreateMsgPort();
-			tioreq= (struct TimeRequest *)CreateIORequest(msgport,sizeof(struct MsgPort));
+			tioreq = (struct TimeRequest *)CreateIORequest(msgport,sizeof(struct MsgPort));
 			OpenDevice("timer.device",UNIT_VBLANK,(struct IORequest *)tioreq,0);
 
-			if(server == NULL) server = default_server();
+			register_funcs();
 
 			if(timesync_poll()) {
 				main_loop();
