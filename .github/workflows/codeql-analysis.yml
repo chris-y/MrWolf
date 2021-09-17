@@ -67,7 +67,7 @@ jobs:
 
     - run: |
           cd ./yfacts
-          gcc -Os -N -o yfacts yfacts.c -lauto
+          make -f Makefile
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
