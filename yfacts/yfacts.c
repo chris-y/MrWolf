@@ -81,6 +81,10 @@ static CxObj *broker;
 static struct MsgPort *broker_mp;
 static int panic_mode = 0;
 
+#ifndef __amigaos4__
+struct Library *TimerBase = NULL;
+#endif
+
 static struct NewBroker newbroker = {
 	NB_VERSION,
 	"YoctoFacts",
