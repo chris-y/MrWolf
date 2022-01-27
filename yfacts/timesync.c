@@ -31,6 +31,7 @@ void timesync_register(struct module_functions *funcs)
 {
 	funcs->sync = timesync_sync;
 	funcs->default_server = timesync_default_server;
+	funcs->cleanup = NULL;
 }
 
 #endif

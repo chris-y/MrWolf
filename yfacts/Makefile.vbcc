@@ -1,9 +1,9 @@
 CC := vc +aos68k
-CFLAGS := -c99
+CFLAGS := -c99 -Inetinclude
 LIBS := -lauto -lamiga
 
-OBJS := yfacts.o debug.o
-DEPS := error.h module.h debug.h
+OBJS := yfacts.o debug.o sntp.c
+DEPS := error.h module.h debug.h sntp.h
 
 all: yfacts
 

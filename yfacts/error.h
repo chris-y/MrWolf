@@ -3,6 +3,8 @@
 enum {
 	ERR_OK = 0,
 	ERR_CONN,
+	ERR_LIB,
+	ERR_MEM,
 	ERR_UNKNOWN
 };
 #endif

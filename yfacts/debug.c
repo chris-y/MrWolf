@@ -1,6 +1,7 @@
 /* debug module */
 #include "debug.h"
 #include "error.h"
+#include "yfacts.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -18,10 +19,16 @@ static char *debug_default_server(void)
 	return strdup("DEBUG\0");	
 }
 
+static void debug_cleanup(void)
+{
+	printf("cleanup\n");
+}
+
 void debug_register(struct module_functions *funcs)
 {
 	funcs->sync = debug_sync;
 	funcs->default_server = debug_default_server;
+	funcs->cleanup = debug_cleanup;
 }
 
 

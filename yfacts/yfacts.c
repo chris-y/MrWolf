@@ -12,10 +12,12 @@ strip -R.comment yfacts
 #include <string.h>
 #include <stdlib.h>
 
+#include <proto/battclock.h>
 #include <proto/commodities.h>
 #include <proto/dos.h>
 #include <proto/exec.h>
 #include <proto/icon.h>
+#include <proto/timer.h>
 #include <proto/wb.h>
 
 #ifndef __amigaos4__
@@ -26,6 +28,7 @@ strip -R.comment yfacts
 
 #include "module.h"
 #include "error.h"
+#include "yfacts.h"
 #include "yFacts_rev.h"
 
 #ifndef __amigaos4__
@@ -59,21 +62,6 @@ char *strdup(const char *s)
 #endif
 
 const char UNUSED *version = VERSTAG;
-
-/* For some reason these are defined differently on OS3.2 and OS4,
-   so we just define our own here */
-
-struct TV_compat /* TimeVal */
-{
-    ULONG Seconds;
-    ULONG Microseconds;
-};
-
-struct TR_compat /* TimeRequest */
-{
-    struct IORequest Request;
-    struct TV_compat   Time;
-};
 
 /* Global config */
 static struct module_functions funcs;
@@ -113,10 +101,43 @@ static inline void show_error(int error, BOOL cli)
 		case ERR_CONN:
 			if(cli) printf("Cannot connect to server\n");
 		break;
-
+		case ERR_LIB:
+			if(cli) printf("Cannot open required library\n");
+		break;
 		default:
 			if(cli) printf("yfacts returned error %ld\n", error);
 		break;
+	}
+}
+
+void set_sys_time(struct TV_compat *tv)
+{
+	tioreq->Request.io_Command = TR_SETSYSTIME;
+	tioreq->Time.Seconds = tv->Seconds;
+	tioreq->Time.Microseconds = tv->Microseconds;
+
+	DoIO(tioreq);
+}
+
+void set_bc_time(struct TV_compat *tv)
+{
+#ifdef __amigaos4__
+	struct BattClockIFace *IBattClock = NULL;
+#endif
+
+	struct Library *BattClockBase = OpenResource("battclock.resource");
+
+	if(BattClockBase) {
+#ifdef __amigaos4__
+		IBattClock = (struct BattClockIFace *)GetInterface((struct Library *)BattClockBase, "main", 1, NULL);
+		if(IBattClock) {
+#endif
+
+			if(BattClockBase) WriteBattClock(tv->Seconds);
+#ifdef __amigaos4__
+			DropInterface(IBattClock);
+		}
+#endif
 	}
 }
 
@@ -130,6 +151,35 @@ static inline char *default_server(void)
 	return funcs.default_server();
 }
 
+static inline void cleanup(void)
+{
+	struct Message *msg;
+
+	if(server) free(server);
+	if(funcs.cleanup) funcs.cleanup();
+
+	if(tioreq)
+	{
+		while(msg = GetMsg(msgport)) {
+        	// ReplyMsg(msg);
+		}
+		if(CheckIO((struct IORequest *)tioreq)==0)
+			{
+		    AbortIO((struct IORequest *)tioreq);
+		    WaitIO((struct IORequest *)tioreq);
+			}
+
+#ifdef __amigaos4__
+		if(ITimer) DropInterface((struct Interface *)ITimer);
+#endif
+		CloseDevice((struct IORequest *) tioreq);
+		DeleteIORequest((struct IORequest *)tioreq);
+		DeleteMsgPort(msgport);
+	}
+
+	return;
+}
+
 static void register_funcs(void)
 {
 	switch(mode) {
@@ -138,6 +188,9 @@ static void register_funcs(void)
 			timesync_register(&funcs);
 		break;
 #endif
+		case TSM_SNTP:
+			sntp_register(&funcs);
+		break;
 		default:
 			debug_register(&funcs);
 		break;
@@ -314,22 +367,6 @@ static void wbcleanup(void)
 			ReplyMsg(msg);
 		DeletePort(broker_mp);
 	}
-
-	if(tioreq)
-	{
-		while(msg = GetMsg(msgport)) {
-        	// ReplyMsg(msg);
-		}
-		if(CheckIO((struct IORequest *)tioreq)==0)
-			{
-		    AbortIO((struct IORequest *)tioreq);
-		    WaitIO((struct IORequest *)tioreq);
-			}
-
-		CloseDevice((struct IORequest *) tioreq);
-		DeleteIORequest((struct IORequest *)tioreq);
-		DeleteMsgPort(msgport);
-	}
 }
 
 int main(int argc, char **argv)
@@ -341,22 +378,31 @@ int main(int argc, char **argv)
 	BOOL quiet = TRUE;
 	int err;
 	int rc = 0;
-	LONG rarray[] = {0, 0, 0, 0};
+	LONG rarray[] = {0, 0, 0, 0, 0};
 	struct RDArgs *args;
-	STRPTR template = "SERVER,PORT/N,SAVE/S,QUIET/S";
+	STRPTR template = "SERVER,PORT/N,USE/S,SAVE/S,QUIET/S";
 
 	enum
 	{
 		A_SERVER,
 		A_PORT,
+		A_USE,
 		A_SAVE,
 		A_QUIET
 	};
 
+	msgport = CreateMsgPort();
+	tioreq = (struct TimeRequest *)CreateIORequest(msgport,sizeof(struct MsgPort));
+	OpenDevice("timer.device",UNIT_VBLANK,(struct IORequest *)tioreq,0);
+
+	TimerBase = (struct Device *)tioreq->Request.io_Device;
+#ifdef __amigaos4__
+	ITimer = (struct TimerIFace *)GetInterface((struct Library *)TimerBase, "main", 1, NULL);
+#endif
+
 	if(argc != 0) {
 		// cli startup
 		quiet = FALSE;
-		savesys = TRUE;
 
 		args = ReadArgs(template,rarray,NULL);
 
@@ -367,6 +413,9 @@ int main(int argc, char **argv)
 
 			if(rarray[A_PORT])
 				port = *(ULONG *)rarray[A_PORT];
+
+			if(rarray[A_USE])
+				savesys = TRUE;
 
 			if(rarray[A_SAVE])
 				savebc = TRUE;
@@ -409,10 +458,6 @@ int main(int argc, char **argv)
 		}
 
 		if(startcx()) {
-			msgport = CreateMsgPort();
-			tioreq = (struct TimeRequest *)CreateIORequest(msgport,sizeof(struct MsgPort));
-			OpenDevice("timer.device",UNIT_VBLANK,(struct IORequest *)tioreq,0);
-
 			register_funcs();
 
 			if(timesync_poll()) {
@@ -423,7 +468,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(server) free(server);
+	cleanup();
 
 	return rc;
 }
