@@ -41,9 +41,9 @@ struct ntp_pkt {
 #define SET_NTP_VN(PKT,VN) PKT->li_vn_mode |= ((VN & 0x7) << 3)
 #define SET_NTP_MODE(PKT,MODE) PKT->li_vn_mode |= ((MODE & 0x7))
 
-#define AMIGA_SECS_TO_NTP_S(S) (S + 2461449600)
+#define AMIGA_SECS_TO_NTP_S(S) ((S < 1833517696) ? (S + 2461449600) : (S - 1833517696))
 #define AMIGA_MICRO_TO_NTP_F(M) (uint32_t)(((uint64_t)M << 32) / 1000000)
-#define NTP_S_TO_AMIGA_SECS(S) (S - 2461449600)
+#define NTP_S_TO_AMIGA_SECS(S) ((S >> 31) ? (S - 2461449600) : (S + 1833517696))
 #define NTP_F_TO_AMIGA_MICRO(F) (uint32_t)(((uint64_t)F * 1000000) >> 32)
 
 //#define CALCDEBUG 1
