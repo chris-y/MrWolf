@@ -60,6 +60,12 @@ static void sntp_closesock(long sock)
 	SocketBase = NULL;
 }
 
+static void sntp_cleanup(void)
+{
+	if(addrs != NULL) FreeVec(addrs);
+	addrs = NULL;
+}
+
 static long sntp_connect(char *server, int port)
 {
 	struct hostent *remote;
@@ -161,6 +167,11 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 
 	sntp_closesock(sock);
 
+	if(pkt->stratum == 0) {
+		sntp_cleanup();
+		return ERR_KOD;
+	}
+
 	or_tv.Seconds = NTP_S_TO_AMIGA_SECS(pkt->originate_time_s);
 	or_tv.Microseconds = NTP_F_TO_AMIGA_MICRO(pkt->originate_time_f);	
 
@@ -240,12 +251,6 @@ static char *sntp_default_server(void)
 {
 	/* should be unsat.pool.ntp.org, but vendor domain request still pending */
 	return strdup("pool.ntp.org\0"); 	
-}
-
-static void sntp_cleanup(void)
-{
-	if(addrs != NULL) FreeVec(addrs);
-	addrs = NULL;
 }
 
 void sntp_register(struct module_functions *funcs)

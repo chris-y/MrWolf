@@ -114,6 +114,9 @@ static inline void show_error(int error, BOOL cli)
 		case ERR_LIB:
 			if(cli) printf("Cannot open required library\n");
 		break;
+		case ERR_KOD:
+			if(cli) printf("Kiss of Death\nPlease use a different server or try again if using the NTP pool\n");
+		break;
 		default:
 			if(cli) printf("yfacts returned error %ld\n", error);
 		break;

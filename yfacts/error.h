@@ -5,6 +5,7 @@ enum {
 	ERR_CONN,
 	ERR_LIB,
 	ERR_MEM,
+	ERR_KOD,
 	ERR_UNKNOWN
 };
 #endif
