@@ -43,6 +43,10 @@ enum {
 	TSM_SNTP
 };
 
+enum {
+	TZM_NONE = 0,
+	TZM_LIB = 1
+};
 
 
 #ifdef __VBCC__
@@ -73,6 +77,8 @@ static BOOL savebc = FALSE;
 static BOOL savesys = FALSE;
 static int panic_warn = 30;
 static int firstsync_delay = 0;
+
+static int tzmode = TZM_LIB;
 
 /* Global vars */
 static struct MsgPort *msgport;
@@ -137,7 +143,7 @@ void set_bc_time(struct TV_compat *tv)
 		if(IBattClock) {
 #endif
 
-			if(BattClockBase) WriteBattClock(tv->Seconds);
+			WriteBattClock(tv->Seconds);
 #ifdef __amigaos4__
 			DropInterface(IBattClock);
 		}
@@ -153,6 +159,30 @@ static inline int timesync(void)
 static inline char *default_server(void)
 {
 	return funcs.default_server();
+}
+
+/* If tv is not NULL will adjust to UTC
+ * Returns offset in seconds West of GMT
+ */
+int tz_offset(struct TV_compat *tv)
+{
+	struct TV_compat tz;
+	int offset = funcs.tz() * 60;
+
+	if((tv == NULL) || (offset == 0)) return offset;
+
+	if(offset < 0) {
+		tz.Seconds = abs(offset);
+		tz.Microseconds = 0;
+
+		SubTime(tv, &tz);
+	} else {
+		tz.Seconds = offset;
+		tz.Microseconds = 0;
+
+		AddTime(tv, &tz);
+	}
+	return offset;
 }
 
 static inline void cleanup(void)
@@ -184,6 +214,11 @@ static inline void cleanup(void)
 	return;
 }
 
+static int tz_dummy(void)
+{
+	return 0;
+}
+
 static void register_funcs(void)
 {
 	switch(mode) {
@@ -197,6 +232,15 @@ static void register_funcs(void)
 		break;
 		default:
 			debug_register(&funcs);
+		break;
+	}
+
+	switch(tzmode) {
+		case TZM_LIB:
+			tzlib_register(&funcs);
+		break;
+		default:
+			funcs.tz = tz_dummy;
 		break;
 	}
 	
@@ -332,6 +376,13 @@ static void gettooltypes(struct WBArg *wbarg)
 			}
 			else if(MatchToolValue(s,"DEBUG")) {
 				mode=TSM_DEBUG;
+			}
+		}
+		if(s = (char *)FindToolType(toolarray,"TZMODE")) {
+			if(MatchToolValue(s,"NONE")) {
+				mode=TZM_NONE;
+			} else if(MatchToolValue(s,"LIBRARY")) {
+				mode=TZM_LIB;
 			}
 		}
 		if(s = (char *)FindToolType(toolarray,"SAVE")) {

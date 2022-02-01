@@ -21,5 +21,5 @@ struct TR_compat /* TimeRequest */
 void set_sys_time(struct TV_compat *tv);
 void set_bc_time(struct TV_compat *tv);
 char *strdup(const char *s);
-
+int tz_offset(struct TV_compat *tv);
 #endif

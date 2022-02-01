@@ -46,7 +46,7 @@ struct ntp_pkt {
 #define NTP_S_TO_AMIGA_SECS(S) (S - 2461449600)
 #define NTP_F_TO_AMIGA_MICRO(F) (uint32_t)(((uint64_t)F * 1000000) >> 32)
 
-#define CALCDEBUG 1
+//#define CALCDEBUG 1
 
 static void sntp_closesock(long sock)
 {
@@ -147,9 +147,8 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 	SET_NTP_VN(pkt, 4); /* Version 4 */
 	SET_NTP_MODE(pkt, 3); /* Client */
 
-	/* TODO: Adjust for time zone */
-
 	GetSysTime(&tx_tv);
+	tz_offset(&tx_tv);
 
 	pkt->transmit_time_s = AMIGA_SECS_TO_NTP_S(tx_tv.Seconds);
 	pkt->transmit_time_f = AMIGA_MICRO_TO_NTP_F(tx_tv.Microseconds);
@@ -158,6 +157,7 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 	size = recv(sock,pkt,48,NULL);
 
 	GetSysTime(&de_tv);
+	tz_offset(&de_tv);
 
 	sntp_closesock(sock);
 
@@ -216,7 +216,11 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 #endif
 
 	GetSysTime(&de_tv);
-	AddTime(&de_tv, &rx_tv); /* add time difference */
+	if(neg) {
+		SubTime(&de_tv, &rx_tv); /* subtract time difference */
+	} else {
+		AddTime(&de_tv, &rx_tv); /* add time difference */
+	}
 
 	if(savesys) {
 		set_sys_time(&de_tv);
@@ -228,9 +232,6 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 
 
 	if(pkt) FreeVec(pkt);
-
-	
-
 
 	return ERR_OK;
 }

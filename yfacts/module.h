@@ -5,6 +5,7 @@ struct module_functions {
 	int (*sync)(char *server, int port, BOOL savesys, BOOL savebc);
 	char *(*default_server)(void);
 	void (*cleanup)(void);
+	int (*tz)(void); /* offset west in minutes */
 };
 
 /* register function headers */
@@ -12,5 +13,6 @@ struct module_functions {
 #include "timesync.h"
 #include "sntp.h"
 
+#include "tzlib.h"
 
 #endif
