@@ -1,5 +1,0 @@
-0006ntp.00/0006ntp.00
-0007sntp.00/0007sntp.00
-0007fade.00/0007fade.00
-0007time.00/0007time.00
-000:daytime.00/000:daytime.00

@@ -66,7 +66,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-          cd ./yfacts
+          cd ./Mr.Wolf
           make -f Makefile
 
     - name: Perform CodeQL Analysis

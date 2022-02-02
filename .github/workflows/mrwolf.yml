@@ -15,12 +15,12 @@ jobs:
       - name: build_os4
         id: build_os4
         run: |
-          cd ./yfacts
+          cd ./Mr.Wolf
           make -f Makefile
       - uses: actions/upload-artifact@v2
         with:
-          name: yfacts
-          path: ./yfacts/yfacts
+          name: Mr.Wolf
+          path: ./Mr.Wolf/Mr.Wolf
   build_68k:
     runs-on: ubuntu-latest
     container:
@@ -31,9 +31,9 @@ jobs:
       - name: build_os3
         id: build_os3
         run: |
-          cd ./yfacts
+          cd ./Mr.Wolf
           make -f Makefile.OS3
       - uses: actions/upload-artifact@v2
         with:
-          name: yfacts.OS3
-          path: ./yfacts/yfacts
+          name: Mr.Wolf.OS3
+          path: ./Mr.Wolf/Mr.Wolf.OS3

@@ -1,4 +1,0 @@
-copy FACTS_bsdsocket_GUI.e ram:
-assign e: apps:development/e
-assign emodules: e:modules
-e:bin/ec ram:facts_bsdsocket_gui.e
