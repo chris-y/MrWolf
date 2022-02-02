@@ -254,6 +254,8 @@ static void killpoll()
 
 static void startpoll(int time)
 {
+    if(time < (15 * 60)) time = (15 * 60);
+
     tioreq->Request.io_Command=TR_ADDREQUEST;
     tioreq->Time.Seconds = time;
     tioreq->Time.Microseconds = 0L;
