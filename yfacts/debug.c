@@ -1,7 +1,7 @@
 /* debug module */
 #include "debug.h"
 #include "error.h"
-#include "yfacts.h"
+#include "mrwolf.h"
 
 #include <string.h>
 #include <stdio.h>

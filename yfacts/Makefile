@@ -2,13 +2,13 @@ CC := gcc
 CFLAGS := -Os -N -D__USE_INLINE__
 LIBS := -lauto
 
-OBJS := yfacts.o timesync.o debug.o sntp.o tzlib.o
+OBJS := mrwolf.o timesync.o debug.o sntp.o tzlib.o
 DEPS := error.h module.h timesync.h debug.h sntp.h tzlib.h
 
-all: yfacts
+all: Mr.Wolf
 
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-yfacts: $(OBJS)
+Mr.Wolf: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)

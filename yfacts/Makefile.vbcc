@@ -2,13 +2,13 @@ CC := vc +aos68k
 CFLAGS := -c99 -Inetinclude
 LIBS := -lauto -lamiga
 
-OBJS := yfacts.o debug.o sntp.c
+OBJS := mrwolf.o debug.o sntp.c
 DEPS := error.h module.h debug.h sntp.h
 
-all: yfacts
+all: Mr.Wolf.OS3
 
 %.o: %.c $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-yfacts: $(OBJS)
+Mr.Wolf.OS3: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)

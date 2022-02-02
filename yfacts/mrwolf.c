@@ -1,12 +1,6 @@
-/* yoctofacts (yFacts)
- * (c) 2013 Chris Young / Unsatisfactory Software
+/* Mr.Wolf
+ * (c) 2013, 2022 Chris Young / Unsatisfactory Software
  */
-
-/*
-gcc -Os -N -o yfacts yfacts.c -lauto
-strip yfacts
-strip -R.comment yfacts
-*/
 
 #include <stdio.h>
 #include <string.h>
@@ -28,8 +22,8 @@ strip -R.comment yfacts
 
 #include "module.h"
 #include "error.h"
-#include "yfacts.h"
-#include "yFacts_rev.h"
+#include "mrwolf.h"
+#include "Mr.Wolf_rev.h"
 
 #ifndef __amigaos4__
 #define TSERR_NONE 0
@@ -93,7 +87,7 @@ struct Device *TimerBase = NULL;
 
 static struct NewBroker newbroker = {
 	NB_VERSION,
-	"YoctoFacts",
+	"Mr. Wolf",
 	VERS,
 	"Minimalistic clock synchronisation",
 	NBU_UNIQUE | NBU_NOTIFY, /* unique*/
@@ -118,7 +112,7 @@ static inline void show_error(int error, BOOL cli)
 			if(cli) printf("Kiss of Death\nPlease use a different server or try again if using the NTP pool\n");
 		break;
 		default:
-			if(cli) printf("yfacts returned error %ld\n", error);
+			if(cli) printf("Mr.Wolf returned error %ld\n", error);
 		break;
 	}
 }
@@ -288,7 +282,7 @@ static BOOL timesync_poll()
 #ifdef __amigaos4__
 			TimedDosRequesterTags(
 				TDR_ImageType, TDRIMAGE_INFO,
-				TDR_TitleString, "YoctoFacts",
+				TDR_TitleString, "Mr. Wolf",
 				TDR_FormatString, "Clock synchronisation has failed above set threshold",
 				TDR_GadgetString, "OK",
 				TDR_Inactive, TRUE,
@@ -487,8 +481,8 @@ int main(int argc, char **argv)
 		}
 
 		if(quiet == FALSE) {
-			printf("YoctoFacts minimalistic clock synchronisation\n");
-			printf("http://www.unsatisfactorysoftware.co.uk/facts\n");
+			printf("Mr. Wolf clock synchronisation\n");
+			printf("https://www.unsatisfactorysoftware.co.uk/\n");
 		}
 
 		if(rc == 10) {

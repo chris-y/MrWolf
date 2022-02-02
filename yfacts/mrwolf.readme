@@ -1,0 +1,153 @@
+Short:        Pool-friendly SNTP time synchronisation client
+Author:       chris@unsatisfactorysoftware.co.uk (Chris Young)
+Uploader:     chris@unsatisfactorysoftware.co.uk (Chris Young)
+Type:         comm/tcp
+Version:      2.1
+Architecture: ppc-amigaos >= 4.0.0
+URL:          http://www.unsatisfactorysoftware.co.uk
+
+Mr.Wolf has evolved from YoctoFacts/yfacts, and is still a
+time synchronisation commodity for AmigaOS.
+
+In most cases it should be a drop-in replacement but 
+
+It now features custom code for SNTP synchronisation, but
+can still use the OS libraries if preferred.
+
+It is recommended to use the built-in client as it is designed
+to play nicely with the NTP pool (ntppool.org).
+
+
+WORKBENCH USAGE
+===============
+
+Double-clicking Mr.Wolf's icon will load it into memory and add it to
+the list of running commodities.  Whilst Mr.Wolf is running, it will
+periodically synchronise the time in the background.
+
+This is the recommended way to use Mr.Wolf.  Add it to WBStartup to
+keep your clock synchronised permanently.
+
+Tooltypes
+---------
+
+MODE
+Synchronsation module to use, either:
+  SNTP - built-in SNTP client (default)
+  LIBRARY - use timesync.library
+
+TZMODE
+Timezone module to use, currently only one is available:
+  LIBRARY - use timezone.library
+
+SERVER
+Name of the NTP server to synchronise with.  If not specified, will
+default to the below, according to MODE:
+  SNTP - pool.ntp.org
+  LIBRARY - As set in Time Prefs
+
+IT IS HIGHLY RECOMMENDED TO LOOK AT NTPPOOL.ORG AND
+SET THE SERVER TO A LOCAL POOL IF USING SNTP MODE.
+
+
+PORT
+Port number to connect to (default NTP port 123)
+
+SAVE=BATTCLOCK|SYSTEM
+Specifies to set the system and/or hardware clock time.
+
+POLL=n
+The interval in minutes to synchronise with the server.  Mr.Wolf will
+attempt to synchronise on startup and then at every n minutes
+thereafter.  Setting POLL=0 will cause Mr.Wolf to quit once the
+initial startup synchronisation has successfully completed.
+(default 720 - please set this to SENSIBLE values to reduce load on
+the server.  A few hours is sensible, a few minutes is not!)
+
+WARN=n
+If yfacts fails to synchronise, it will enter "panic mode" and attempt
+to synchronise once a minute.  When the number of panic attempts
+reaches this warning value, a requester will appear.  Setting WARN=-1
+will disable all warnings. (default=30)
+
+DELAY=n
+Delays the first sync by n seconds.  Sometimes useful to ensure the
+network is fully initialised.
+
+Usage
+-----
+
+Mr.Wolf has no GUI and can only be controlled through Commodites Exchange.
+Clicking Remove will quit Mr.Wolf.  Attempting to run Mr.Wolf twice will
+also quit it.
+The Active/Inactive cycle gadget will stop Mr.Wolf from synchronising.
+Note that when re-enabled, Mr.Wolf will attempt an immediate
+synchronisation.
+
+
+CLI USAGE
+=========
+
+From the Shell, Mr.Wolf will synchronise the clock and exit.  In this
+environment, it is comparable to the OS-provided "date" command with
+an optional built-in "setclock save".
+
+Mr.Wolf SERVER,PORT/N,USE/S,SAVE/S,QUIET/S
+
+SERVER is the name of the NTP server to use
+PORT is the TCP port to use (defaults to 123)
+USE will cause Mr.Wolf to set the current system time
+SAVE will cause Mr.Wolf to save the time to the hardware clock
+  (NB: SAVE does not imply USE!)
+QUIET suppresses all output
+
+Note that not specifying either USE or SAVE will connect and retrieve
+the time but not do anything useful or interesting.
+
+Currently it is not possible to set the sync module through the
+command line, it always uses the built-in SNTP client.
+
+Example:
+Mr.Wolf USE SAVE
+Will synchronise with the default server, and set the system and
+hardware clocks.
+
+
+HISTORY
+=======
+
+2.1 (02.02.2022)
+* Renamed to Mr.Wolf
+* New built-in SNTP client
+
+Ancient history - YoctoFacts
+1.5 (16.03.2013) added DELAY tooltype
+1.4 (08.02.2013) default server etc set to that in Time Prefs
+1.3 (08.02.2013) add panic mode for more rapid attempts when a sync fails
+1.2 (06.02.2013) fix timezone offset
+1.1 (05.02.2013) first release
+
+
+FUTURE
+======
+The intention is to make this compatible with OS3, but there is some
+work to do around timezones.
+
+
+CONTACT
+=======
+
+Chris Young <chris@unsatisfactorysoftware.co.uk>
+http://www.unsatisfactorysoftware.co.uk
+
+Often emails to that address end up in SPAM, it is better to raise an
+issue at https://github.com/chris-y/MrWolf
+
+
+DISCLAIMER
+==========
+
+All use of this software is at your own risk.  It comes with no
+warranty either expressed or implied.  The author will take no
+responsibility for loss of data incurred directly or indirectly as a
+result of using this software.
