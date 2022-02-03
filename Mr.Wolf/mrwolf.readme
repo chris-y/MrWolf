@@ -1,4 +1,4 @@
-Short:        Pool-friendly SNTP time synchronisation client
+Short:        Pool-friendly SNTP time sync client
 Author:       chris@unsatisfactorysoftware.co.uk (Chris Young)
 Uploader:     chris@unsatisfactorysoftware.co.uk (Chris Young)
 Type:         comm/tcp
