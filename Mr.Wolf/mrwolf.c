@@ -1,5 +1,5 @@
 /* Mr.Wolf
- * (c) 2013, 2022 Chris Young / Unsatisfactory Software
+ * (c) 2013, 2022,  Chris Young / Unsatisfactory Software
  */
 
 #include <stdio.h>
@@ -254,8 +254,6 @@ static void killpoll()
 
 static void startpoll(int time)
 {
-    if(time < (15 * 60)) time = (15 * 60);
-
     tioreq->Request.io_Command=TR_ADDREQUEST;
     tioreq->Time.Seconds = time;
     tioreq->Time.Microseconds = 0L;
@@ -362,7 +360,10 @@ static void gettooltypes(struct WBArg *wbarg)
 	if((*wbarg->wa_Name) && (dobj=GetDiskObject(wbarg->wa_Name))) {
 		toolarray = (STRPTR *)dobj->do_ToolTypes;
 		if(s = (char *)FindToolType(toolarray,"SERVER")) server = strdup(s);
-		if(s = (char *)FindToolType(toolarray,"POLL")) poll = atoi(s);
+		if(s = (char *)FindToolType(toolarray,"POLL")) {
+			poll = atoi(s);
+			if(poll < (15 * 60)) poll = (15 * 60);
+		}
 		if(s = (char *)FindToolType(toolarray,"PORT")) port = atoi(s);
 		if(s = (char *)FindToolType(toolarray,"DELAY")) firstsync_delay = atoi(s);
 		if(s = (char *)FindToolType(toolarray,"WARN")) panic_warn = atoi(s);
