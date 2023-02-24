@@ -116,6 +116,10 @@ hardware clocks.
 HISTORY
 =======
 
+2.2 (24.02.2023)
+* Fixed a bug where Mr.Wolf would wait 15 minutes in certain
+  circumstances (DELAY etc)
+
 2.1 (02.02.2022)
 * Renamed to Mr.Wolf
 * New built-in SNTP client
