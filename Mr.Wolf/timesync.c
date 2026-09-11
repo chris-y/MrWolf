@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "timesync.h"
 #include "error.h"
+#include "strdup.h"
 
 static int timesync_sync(char *server, int port, BOOL savesys, BOOL savebc)
 {
@@ -23,7 +24,7 @@ static int timesync_sync(char *server, int port, BOOL savesys, BOOL savebc)
 
 static char *timesync_default_server(void)
 {
-	return strdup("PREFS\0");	
+	return strdup_vec("PREFS\0");
 }
 
 

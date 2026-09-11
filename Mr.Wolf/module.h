@@ -14,5 +14,6 @@ struct module_functions {
 #include "sntp.h"
 
 #include "tzlib.h"
+#include "ipapi.h"
 
 #endif

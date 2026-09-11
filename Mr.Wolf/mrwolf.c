@@ -23,6 +23,7 @@
 #include "module.h"
 #include "error.h"
 #include "mrwolf.h"
+#include "strdup.h"
 #include "Mr.Wolf_rev.h"
 
 #ifndef __amigaos4__
@@ -39,7 +40,8 @@ enum {
 
 enum {
 	TZM_NONE = 0,
-	TZM_LIB = 1
+	TZM_LIB,
+	TZM_IPAPI
 };
 
 
@@ -72,7 +74,11 @@ static BOOL savesys = FALSE;
 static int panic_warn = 30;
 static int firstsync_delay = 0;
 
+#if 0 //#ifdef __amigaos4__
 static int tzmode = TZM_LIB;
+#else
+static int tzmode = TZM_IPAPI;
+#endif
 
 /* Global vars */
 static struct MsgPort *msgport;
@@ -186,7 +192,7 @@ static inline void cleanup(void)
 {
 	struct Message *msg;
 
-	if(server) free(server);
+	if(server) FreeVec(server);
 	if(funcs.cleanup) funcs.cleanup();
 
 	if(tioreq)
@@ -233,8 +239,13 @@ static void register_funcs(void)
 	}
 
 	switch(tzmode) {
+#ifdef __amigaos4__
 		case TZM_LIB:
 			tzlib_register(&funcs);
+		break;
+#endif
+		case TZM_IPAPI:
+			ipapi_register(&funcs);
 		break;
 		default:
 			funcs.tz = tz_dummy;
@@ -359,7 +370,7 @@ static void gettooltypes(struct WBArg *wbarg)
 
 	if((*wbarg->wa_Name) && (dobj=GetDiskObject(wbarg->wa_Name))) {
 		toolarray = (STRPTR *)dobj->do_ToolTypes;
-		if(s = (char *)FindToolType(toolarray,"SERVER")) server = strdup(s);
+		if(s = (char *)FindToolType(toolarray,"SERVER")) server = strdup_vec(s);
 		if(s = (char *)FindToolType(toolarray,"POLL")) {
 			poll = atoi(s);
 			if(poll < (15 * 60)) poll = (15 * 60);
@@ -463,7 +474,7 @@ int main(int argc, char **argv)
 
 		if(args) {
 			if(rarray[A_SERVER]) {
-				server = strdup((char *)rarray[A_SERVER]);
+				server = strdup_vec((char *)rarray[A_SERVER]);
 			}
 
 			if(rarray[A_PORT])
