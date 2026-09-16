@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "mrwolf.h"
 #include "strdup.h"
 
 char *strdup_vec(const char *s)

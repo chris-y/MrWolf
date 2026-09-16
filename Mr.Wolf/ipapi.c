@@ -3,6 +3,7 @@
 #include <proto/bsdsocket.h>
 #include "ipapi.h"
 #include "error.h"
+#include "mrwolf.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -19,7 +20,7 @@ static void ipapi_closesock(long sock)
 static long ipapi_connect(char *server, int port)
 {
 	struct hostent *remote;
-	struct TimeVal time;
+	struct TV_compat time;
 	long sock = -1;
 	long conn = -1;
 

@@ -74,7 +74,7 @@ static void sntp_cleanup(void)
 static long sntp_connect(char *server, int port)
 {
 	struct hostent *remote;
-	struct TimeVal time;
+	struct TV_compat time;
 	long sock = -1;
 	long conn = -1;
 

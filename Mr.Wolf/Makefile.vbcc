@@ -1,9 +1,9 @@
 CC := vc +aos68k
-CFLAGS := -c99 -Inetinclude
+CFLAGS := -c99 -Inetinclude:
 LIBS := -lauto -lamiga
 
-OBJS := mrwolf.o debug.o sntp.o ipapi.o
-DEPS := error.h module.h debug.h sntp.h ipapi.h
+OBJS := mrwolf.o debug.o sntp.o strdup.o ipapi.o
+DEPS := error.h module.h debug.h sntp.h strdup.h ipapi.h
 
 all: Mr.Wolf.OS3
 

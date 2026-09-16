@@ -18,6 +18,10 @@ struct TR_compat /* TimeRequest */
     struct TV_compat   Time;
 };
 
+#ifndef MEMF_PRIVATE
+#define MEMF_PRIVATE 0
+#endif
+
 void set_sys_time(struct TV_compat *tv);
 void set_bc_time(struct TV_compat *tv);
 char *strdup(const char *s);
