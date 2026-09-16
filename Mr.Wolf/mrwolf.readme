@@ -37,8 +37,9 @@ Synchronsation module to use, either:
   LIBRARY - use timesync.library
 
 TZMODE
-Timezone module to use, currently only one is available:
+Timezone module to use, defaults to LIBRARY on OS4 and IPAPI otherwise:
   LIBRARY - use timezone.library
+  IPAPI   - guess timezone using ip-api.com
 
 SERVER
 Name of the NTP server to synchronise with.  If not specified, will
