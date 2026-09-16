@@ -458,7 +458,7 @@ int main(int argc, char **argv)
 	};
 
 	msgport = CreateMsgPort();
-	tioreq = (struct TimeRequest *)CreateIORequest(msgport,sizeof(struct MsgPort));
+	tioreq = (struct TimeRequest *)CreateIORequest(msgport,sizeof(struct TR_compat));
 	OpenDevice("timer.device",UNIT_VBLANK,(struct IORequest *)tioreq,0);
 
 	TimerBase = (struct Device *)tioreq->Request.io_Device;
