@@ -48,22 +48,27 @@ struct ntp_pkt {
 
 //#define CALCDEBUG 1
 
+static void sntp_closelibs(void)
+{
+#ifdef __amigaos4__
+	if(ISocket) DropInterface((struct Interface *)ISocket);
+#endif
+	if(SocketBase) CloseLibrary(SocketBase);
+	ISocket = NULL;
+	SocketBase = NULL;
+}
+
 static void sntp_closesock(long sock)
 {
 	if(sock >= 0) CloseSocket(sock);
-
-#ifdef __amigaos4__
-	DropInterface((struct Interface *)ISocket);
-#endif
-	CloseLibrary(SocketBase);
-	ISocket = NULL;
-	SocketBase = NULL;
 }
 
 static void sntp_cleanup(void)
 {
 	if(addrs != NULL) FreeVec(addrs);
 	addrs = NULL;
+
+	sntp_closelibs();
 }
 
 static long sntp_connect(char *server, int port)
@@ -132,12 +137,14 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 	long sock = -1;
 	long size = 0;
 
-	if(SocketBase = OpenLibrary("bsdsocket.library",4)) {
+	if(SocketBase == NULL) {
+		if(SocketBase = OpenLibrary("bsdsocket.library",4)) {
 #ifdef __amigaos4__
-		ISocket = (struct SocketIFace *)GetInterface(SocketBase,"main",1,NULL);
+			ISocket = (struct SocketIFace *)GetInterface(SocketBase,"main",1,NULL);
 #endif
-	} else {
-		return ERR_LIB;
+		} else {
+			return ERR_LIB;
+		}
 	}
 
 	sock = sntp_connect(server, port);
@@ -159,13 +166,14 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 	pkt->transmit_time_s = AMIGA_SECS_TO_NTP_S(tx_tv.Seconds);
 	pkt->transmit_time_f = AMIGA_MICRO_TO_NTP_F(tx_tv.Microseconds);
 
-	send(sock,pkt,48,NULL);
-	size = recv(sock,pkt,48,NULL);
+	send(sock,pkt,48,0);
+	size = recv(sock,pkt,48,0);
 
 	GetSysTime(&de_tv);
-	tz_offset(&de_tv);
 
 	sntp_closesock(sock);
+
+	tz_offset(&de_tv);
 
 	if(pkt->stratum == 0) {
 		sntp_cleanup();
@@ -243,6 +251,8 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 
 
 	if(pkt) FreeVec(pkt);
+
+	sntp_closelibs();
 
 	return ERR_OK;
 }

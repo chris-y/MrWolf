@@ -1,5 +1,5 @@
-CC := gcc
-CFLAGS := -Os -N -D__USE_INLINE__ -gstabs
+CC := vc +aosppc
+CFLAGS := -D__USE_INLINE__
 LIBS := -lauto
 
 OBJS := mrwolf.o timesync.o debug.o sntp.o tzlib.o ipapi.o strdup.o
@@ -12,6 +12,3 @@ all: Mr.Wolf
 
 Mr.Wolf: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
-
-clean:
-	delete #?.o
