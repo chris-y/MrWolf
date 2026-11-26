@@ -111,6 +111,9 @@ static inline void show_error(int error, BOOL cli)
 		case ERR_CONN:
 			if(cli) printf("Cannot connect to server\n");
 		break;
+		case ERR_TIMEOUT:
+			if(cli) printf("Timeout connecting to server\n");
+		break;
 		case ERR_LIB:
 			if(cli) printf("Cannot open required library\n");
 		break;
@@ -274,17 +277,22 @@ static void startpoll(int time)
 /* Sync and start polling, returns FALSE if no new poll set up */
 static BOOL timesync_poll()
 {
+	static int backoff = 1;
+	int err = ERR_OK;
+	ULONG newpoll = poll;
+
 	if (firstsync_delay) {
 		startpoll(firstsync_delay);
 		firstsync_delay = 0;
 		return TRUE;
 	}
 
-	if (timesync() == ERR_OK) {
+	if ((err = timesync()) == ERR_OK) {
 		panic_mode = 0;
+		backoff = 1;
 
 		if(poll > 0) {
-			startpoll(poll * 60);
+			startpoll(poll);
 		} else {
 			return FALSE;
 		}
@@ -303,7 +311,16 @@ static BOOL timesync_poll()
 #endif
 		}
 		panic_mode++;
-		startpoll(60);
+		if(err == ERR_KOD) {
+			backoff *= 2;
+			newpoll = poll * backoff;
+			if(newpoll > 3600) newpoll = 3600;
+		} else {
+			backoff = 1;
+			newpoll = poll;
+		}
+
+		startpoll(newpoll);
 	}
 	return TRUE;
 }

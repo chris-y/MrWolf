@@ -3,6 +3,7 @@
 enum {
 	ERR_OK = 0,
 	ERR_CONN,
+	ERR_TIMEOUT,
 	ERR_LIB,
 	ERR_MEM,
 	ERR_KOD,

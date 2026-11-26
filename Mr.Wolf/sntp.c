@@ -23,7 +23,7 @@ struct ntp_pkt {
 	uint8_t precision;
 	uint32_t root_delay;
 	uint32_t root_disp;
-	uint32_t reference_id;
+	uint8_t reference_id[4];
 	uint32_t reference_time_s;
 	uint32_t reference_time_f;
 	uint32_t originate_time_s;
@@ -176,8 +176,22 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 	tz_offset(&de_tv);
 
 	if(pkt->stratum == 0) {
+		int err;
+
+		if((pkt->reference_id[0] == 0) &&
+			(pkt->reference_id[1] == 0) &&
+			(pkt->reference_id[2] == 0) &&
+			(pkt->reference_id[3] == 0)) {
+			err = ERR_TIMEOUT;
+		} else {
+			err = ERR_KOD;
+		}
+
+		//printf("%c%c%c%c\n", pkt->reference_id[0], pkt->reference_id[1], pkt->reference_id[2], pkt->reference_id[3]);
+
+		if(pkt) FreeVec(pkt);
 		sntp_cleanup();
-		return ERR_KOD;
+		return err;
 	}
 
 	or_tv.Seconds = NTP_S_TO_AMIGA_SECS(pkt->originate_time_s);
