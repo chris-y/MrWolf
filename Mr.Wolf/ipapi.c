@@ -59,7 +59,7 @@ static long ipapi_connect(char *server, int port)
 
 	conn = connect(sock, saddr, saddr->sa_len);
 	if(conn != 0) {
-		printf("conn %d error %d\n", conn, errno);
+		//printf("conn %d error %d\n", conn, errno);
 		addrs = NULL; /* Clear cache */
 		ipapi_closesock(sock);
 		return(-3);
@@ -92,7 +92,7 @@ static int ipapi_tz(void)
 
 	sock = ipapi_connect("ip-api.com", 80);
 	if(sock < 0) {
-		printf("%ld\n", sock);
+		//printf("%ld\n", sock);
 		return ERR_CONN;
 	}
 

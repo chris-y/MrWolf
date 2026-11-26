@@ -74,7 +74,7 @@ static BOOL savesys = FALSE;
 static int panic_warn = 30;
 static int firstsync_delay = 0;
 
-#if 0 //#ifdef __amigaos4__
+#ifdef __amigaos4__
 static int tzmode = TZM_LIB;
 #else
 static int tzmode = TZM_IPAPI;
