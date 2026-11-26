@@ -116,7 +116,7 @@ static long sntp_connect(char *server, int port)
 
 	conn = connect(sock, saddr, saddr->sa_len);
 	if(conn != 0) {
-		printf("conn %d error %d\n", conn, errno);
+		//printf("conn %d error %d\n", conn, errno);
 		addrs = NULL; /* Clear cache */
 		sntp_closesock(sock);
 		return(-3);
@@ -149,7 +149,7 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 
 	sock = sntp_connect(server, port);
 	if(sock < 0) {
-		printf("%ld\n", sock);
+		//printf("%ld\n", sock);
 		return ERR_CONN;
 	}
 
