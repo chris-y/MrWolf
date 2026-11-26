@@ -259,8 +259,7 @@ static int sntp_sync(char *server, int port, BOOL savesys, BOOL savebc)
 
 static char *sntp_default_server(void)
 {
-	/* should be unsat.pool.ntp.org, but vendor domain request still pending */
-	return strdup("pool.ntp.org\0"); 	
+	return strdup("unsat.pool.ntp.org\0"); 	
 }
 
 void sntp_register(struct module_functions *funcs)

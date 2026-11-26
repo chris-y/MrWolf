@@ -44,7 +44,7 @@ Timezone module to use, defaults to LIBRARY on OS4 and IPAPI otherwise:
 SERVER
 Name of the NTP server to synchronise with.  If not specified, will
 default to the below, according to MODE:
-  SNTP - pool.ntp.org
+  SNTP - unsat.pool.ntp.org
   LIBRARY - As set in Time Prefs
 
 IT IS HIGHLY RECOMMENDED TO LOOK AT NTPPOOL.ORG AND
@@ -137,6 +137,14 @@ FUTURE
 ======
 The intention is to make this compatible with OS3, but there is some
 work to do around timezones.
+
+
+NTP POOL
+========
+
+This software uses the NTP pool, ntppool.org
+If you have a static IP you are invited to join the pool
+https://www.ntppool.org/join.html
 
 
 CONTACT
